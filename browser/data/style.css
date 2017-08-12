@@ -1,0 +1,36 @@
+html{
+	font-size:14px;
+	font-family:'Hiragino Sans GB', Arial, sans-serif;
+	line-height:26px;
+	font-weight:bold;
+	color:#285254;
+}
+
+.tips,.olink{
+	border:1px solid #ccc;
+	border-radius:4px;
+	background-color:#DBD0B4;
+	padding:4 10px;
+	margin-bottom:20px;
+	margin-top:20px;
+	font-size:14px;
+}
+
+body {
+	background-color:#F7F8FA;
+}
+
+br{
+	display:inline; 
+	line-height:10px; 
+}
+
+div.centerx{
+	width:800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+image, [type="image"]{
+	max-width:800px;
+}
