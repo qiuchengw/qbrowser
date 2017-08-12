@@ -266,6 +266,21 @@
     <ClCompile Include="GeneratedFiles\Release\moc_browserwnd.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_browser.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_browser.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="workerstack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_workerstack.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_workerstack.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -307,16 +322,10 @@
     <ClInclude Include="GeneratedFiles\ui_settings.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_workerstack.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="comboxkey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="xbel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="browser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -355,9 +364,6 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="settings.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="workerstack.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="autosaver.h">
@@ -430,6 +436,12 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="browserwnd.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="browser.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="workerstack.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

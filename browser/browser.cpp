@@ -13,11 +13,17 @@ extern "C" {
         return BrowserService::instance()->newBroswer();
     }
 
-    bool initBrowserSevice(){
+    bool initBrowserSevice(BrowserServiceContext* ctx){
         return true;
     }
 
     WebView* openUrl(BROWSER_HANDLE h, const QString& url, bool new_tab, bool bkgnd) {
         return browser(h)->loadUrl(url, new_tab, bkgnd);
     }
+
+    void addBrowserFunctionPanel(BROWSER_HANDLE h, BrowserFunctionPanel* panel){
+        browser(h)->addFunctionPanel(panel);
+    }
+
 }
+

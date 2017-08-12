@@ -50,7 +50,7 @@ InvokeWrapper<Arg, R, C> invoke(R *receiver, void (C::*memberFun)(Arg))
     return wrapper;
 }
 
-const char *BrowserWnd::defaultHome = "about:blank";
+const char *BrowserWnd::DEFAULT_HOME = "about:blank";
 
 BrowserWnd::BrowserWnd(QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
@@ -135,6 +135,11 @@ BrowserWnd::~BrowserWnd()
 {
     m_autoSaver->changeOccurred();
     m_autoSaver->saveIfNeccessary();
+}
+
+void BrowserWnd::addFunctionPanel(BrowserFunctionPanel* panel)
+{
+
 }
 
 void BrowserWnd::loadDefaultState()
@@ -850,7 +855,7 @@ void BrowserWnd::slotHome()
 {
     QSettings settings;
     settings.beginGroup(QLatin1String("MainWindow"));
-    QString home = settings.value(QLatin1String("home"), QLatin1String(defaultHome)).toString();
+    QString home = settings.value(QLatin1String("home"), QLatin1String(DEFAULT_HOME)).toString();
     loadPage(home);
 }
 

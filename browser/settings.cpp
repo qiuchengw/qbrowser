@@ -124,7 +124,7 @@ void SettingsDialog::loadFromSettings()
 {
     QSettings settings;
     settings.beginGroup(QLatin1String("MainWindow"));
-    const QString defaultHome = QLatin1String(BrowserWnd::defaultHome);
+    const QString defaultHome = QLatin1String(BrowserWnd::DEFAULT_HOME);
     homeLineEdit->setText(settings.value(QLatin1String("home"), defaultHome).toString());
     settings.endGroup();
 

@@ -19,11 +19,7 @@ class TabWidget;
 class ToolbarSearch;
 class WebView;
 
-/*!
-    The MainWindow of the Browser Application.
-
-    Handles the tab widget and all the actions
- */
+class BrowserFunctionPanel;
 class BrowserWnd : public QMainWindow {
     Q_OBJECT
 
@@ -32,7 +28,9 @@ public:
     ~BrowserWnd();
     QSize sizeHint() const;
 
-    static const char *defaultHome;
+    static const char *DEFAULT_HOME;
+
+    void addFunctionPanel(BrowserFunctionPanel* panel);
 
 public:
     TabWidget *tabWidget() const;
@@ -142,6 +140,8 @@ private:
     QString m_lastSearch;
     QString m_printerOutputFileName;
     friend class BrowserService;
+
+
 };
 
 #endif // BROWSERMAINWINDOW_H

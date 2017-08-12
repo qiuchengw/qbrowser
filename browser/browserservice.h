@@ -24,6 +24,7 @@ class HistoryManager;
 
 #include "kutil/singleton.h"
 
+struct BrowserServiceContext;
 class BrowserService : public SingletonWithBase<BrowserService, QObject>
 {
     Q_OBJECT
@@ -35,6 +36,14 @@ class BrowserService : public SingletonWithBase<BrowserService, QObject>
 
 public:
     void loadSettings();
+
+    void setContext(BrowserServiceContext* ctx) {
+        ctx_ = ctx;
+    }
+
+    BrowserServiceContext* context()const{
+        return ctx_;
+    }
 
     BrowserWnd *browser();
     QList<BrowserWnd*> browsers();
@@ -83,6 +92,7 @@ private:
     bool m_privateBrowsing = false;
     mutable QIcon m_defaultIcon;
 
+    BrowserServiceContext* ctx_ = nullptr;
     QAuthenticator m_lastAuthenticator;
     QAuthenticator m_lastProxyAuthenticator;
 };
