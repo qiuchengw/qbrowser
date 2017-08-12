@@ -1,6 +1,53 @@
-
+/****************************************************************************
+**
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the demonstration applications of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:BSD$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** BSD License Usage
+** Alternatively, you may use this file under the terms of the BSD license
+** as follows:
+**
+** "Redistribution and use in source and binary forms, with or without
+** modification, are permitted provided that the following conditions are
+** met:
+**   * Redistributions of source code must retain the above copyright
+**     notice, this list of conditions and the following disclaimer.
+**   * Redistributions in binary form must reproduce the above copyright
+**     notice, this list of conditions and the following disclaimer in
+**     the documentation and/or other materials provided with the
+**     distribution.
+**   * Neither the name of The Qt Company Ltd nor the names of its
+**     contributors may be used to endorse or promote products derived
+**     from this software without specific prior written permission.
+**
+**
+** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 #include "stdafx.h"
-
 #include "browsermainwindow.h"
 
 #include "autosaver.h"
@@ -15,7 +62,26 @@
 #include "toolbarsearch.h"
 #include "ui_passworddialog.h"
 #include "webview.h"
-#include "workerstack.h"
+
+#include <QtCore/QSettings>
+
+#include <QtWidgets/QDesktopWidget>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QPlainTextEdit>
+#include <QtPrintSupport/QPrintDialog>
+#include <QtPrintSupport/QPrintPreviewDialog>
+#include <QtPrintSupport/QPrinter>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QToolBar>
+#include <QtWidgets/QInputDialog>
+
+#include <QWebEngineHistory>
+#include <QWebEngineProfile>
+#include <QWebEngineSettings>
+
+#include <QtCore/QDebug>
 
 template<typename Arg, typename R, typename C>
 struct InvokeWrapper {
@@ -33,13 +99,12 @@ InvokeWrapper<Arg, R, C> invoke(R *receiver, void (C::*memberFun)(Arg))
     return wrapper;
 }
 
-const char *BrowserMainWindow::defaultHome = "about:blank";
+const char *BrowserMainWindow::defaultHome = "http://qt.io/";
 
 BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
     , m_tabWidget(new TabWidget(this))
     , m_autoSaver(new AutoSaver(this))
-    , m_workerstack(new WorkerStack(this, m_tabWidget))
     , m_historyBack(0)
     , m_historyForward(0)
     , m_stop(0)
@@ -55,7 +120,7 @@ BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
     setupToolBar();
 
     QWidget *centralWidget = new QWidget(this);
-    BookmarksModel *bookmarksModel = BrowserApplication::bookmarksManager()->bookmarksModel();
+    BookmarksModel *bookmarksModel = BrowserAppCtx::bookmarksManager()->bookmarksModel();
     m_bookmarksToolbar = new BookmarksToolBar(bookmarksModel, this);
     connect(m_bookmarksToolbar, SIGNAL(openUrl(QUrl)),
             m_tabWidget, SLOT(loadUrlInCurrentTab(QUrl)));
@@ -72,17 +137,7 @@ BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
     addToolBarBreak();
     addToolBar(m_bookmarksToolbar);
 #endif
-    QSplitter *spliter = new QSplitter(this);
-    spliter->setHandleWidth(4);
-    spliter->setOrientation(Qt::Horizontal);
-    spliter->addWidget(m_tabWidget);
-    spliter->addWidget(m_workerstack);
-
-//     QHBoxLayout *h_layut = new QHBoxLayout();
-//     h_layut->addWidget(m_tabWidget);
-//     h_layut->addWidget(m_workerstack);
-//     layout->addLayout(h_layut, 1);
-    layout->addWidget(spliter, 1);
+    layout->addWidget(m_tabWidget);
     centralWidget->setLayout(layout);
     setCentralWidget(centralWidget);
 
@@ -112,13 +167,9 @@ BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
             m_navigationBar, SLOT(setVisible(bool)));
     connect(m_tabWidget, SIGNAL(toolBarVisibilityChangeRequested(bool)),
             m_bookmarksToolbar, SLOT(setVisible(bool)));
-#if defined(Q_OS_OSX)
-    connect(m_tabWidget, SIGNAL(lastTabClosed()),
-            this, SLOT(close()));
-#else
+
     connect(m_tabWidget, SIGNAL(lastTabClosed()),
             m_tabWidget, SLOT(newTab()));
-#endif
 
     slotUpdateWindowTitle();
     loadDefaultState();
@@ -153,7 +204,7 @@ QSize BrowserMainWindow::sizeHint() const
 
 void BrowserMainWindow::save()
 {
-    BrowserApplication::instance()->saveSession();
+    BrowserAppCtx::instance()->saveSession();
 
     QSettings settings;
     settings.beginGroup(QLatin1String("BrowserMainWindow"));
@@ -254,7 +305,7 @@ void BrowserMainWindow::setupMenu()
                 SLOT(slotFileSaveAs()), QKeySequence(QKeySequence::Save));
     fileMenu->addSeparator();
 #endif
-    BookmarksManager *bookmarksManager = BrowserApplication::bookmarksManager();
+    BookmarksManager *bookmarksManager = BrowserAppCtx::bookmarksManager();
     fileMenu->addAction(tr("&Import Bookmarks..."), bookmarksManager, SLOT(importBookmarks()));
     fileMenu->addAction(tr("&Export Bookmarks..."), bookmarksManager, SLOT(exportBookmarks()));
     fileMenu->addSeparator();
@@ -269,12 +320,12 @@ void BrowserMainWindow::setupMenu()
 
     QAction *action = fileMenu->addAction(tr("Private &Browsing..."), this, SLOT(slotPrivateBrowsing()));
     action->setCheckable(true);
-    action->setChecked(BrowserApplication::instance()->privateBrowsing());
-    connect(BrowserApplication::instance(), SIGNAL(privateBrowsingChanged(bool)), action, SLOT(setChecked(bool)));
+    action->setChecked(BrowserAppCtx::instance()->privateBrowsing());
+    connect(BrowserAppCtx::instance(), SIGNAL(privateBrowsingChanged(bool)), action, SLOT(setChecked(bool)));
     fileMenu->addSeparator();
 
 #if defined(Q_OS_OSX)
-    fileMenu->addAction(tr("&Quit"), BrowserApplication::instance(), SLOT(quitBrowser()), QKeySequence(Qt::CTRL | Qt::Key_Q));
+    fileMenu->addAction(tr("&Quit"), BrowserAppCtx::instance(), SLOT(quitBrowser()), QKeySequence(Qt::CTRL | Qt::Key_Q));
 #else
     fileMenu->addAction(tr("&Quit"), this, SLOT(close()), QKeySequence(Qt::CTRL | Qt::Key_Q));
 #endif
@@ -353,9 +404,9 @@ void BrowserMainWindow::setupMenu()
     viewMenu->addAction(tr("Reset &Zoom"), this, SLOT(slotViewResetZoom()), QKeySequence(Qt::CTRL | Qt::Key_0));
 
     viewMenu->addSeparator();
-//     QAction *m_pageSource = viewMenu->addAction(tr("Page S&ource"));
-//     m_pageSource->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_U));
-//     m_tabWidget->addWebAction(m_pageSource, QWebEnginePage::ViewSource);
+    QAction *m_pageSource = viewMenu->addAction(tr("Page S&ource"));
+    m_pageSource->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_U));
+    m_tabWidget->addWebAction(m_pageSource, QWebEnginePage::ViewSource);
 
     QAction *a = viewMenu->addAction(tr("&Full Screen"), this, SLOT(slotViewFullScreen(bool)),  Qt::Key_F11);
     a->setCheckable(true);
@@ -407,8 +458,8 @@ void BrowserMainWindow::setupMenu()
 
 #if defined(QWEBENGINEHISTORY_RESTORESESSION)
     m_restoreLastSession = new QAction(tr("Restore Last Session"), this);
-    connect(m_restoreLastSession, SIGNAL(triggered()), BrowserApplication::instance(), SLOT(restoreLastSession()));
-    m_restoreLastSession->setEnabled(BrowserApplication::instance()->canRestoreSession());
+    connect(m_restoreLastSession, SIGNAL(triggered()), BrowserAppCtx::instance(), SLOT(restoreLastSession()));
+    m_restoreLastSession->setEnabled(BrowserAppCtx::instance()->canRestoreSession());
     historyActions.append(m_tabWidget->recentlyClosedTabsAction());
     historyActions.append(m_restoreLastSession);
 #endif
@@ -452,7 +503,8 @@ void BrowserMainWindow::setupMenu()
 #endif
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-    helpMenu->addAction(tr("About"), this, SLOT(slotAboutApplication()));
+    helpMenu->addAction(tr("About &Qt"), qApp, SLOT(aboutQt()));
+    helpMenu->addAction(tr("About &Demo Browser"), this, SLOT(slotAboutApplication()));
 }
 
 void BrowserMainWindow::setupToolBar()
@@ -580,7 +632,7 @@ void BrowserMainWindow::loadUrl(const QUrl &url)
 
 void BrowserMainWindow::slotDownloadManager()
 {
-    BrowserApplication::downloadManager()->show();
+    BrowserAppCtx::downloadManager()->show();
 }
 
 void BrowserMainWindow::slotSelectLineEdit()
@@ -608,12 +660,12 @@ void BrowserMainWindow::slotUpdateStatusbar(const QString &string)
 void BrowserMainWindow::slotUpdateWindowTitle(const QString &title)
 {
     if (title.isEmpty()) {
-        setWindowTitle(tr("1024ä¯ÀÀÆ÷"));
+        setWindowTitle(tr("Qt Demo Browser"));
     } else {
 #if defined(Q_OS_OSX)
         setWindowTitle(title);
 #else
-        setWindowTitle(tr("%1 - 1024ä¯ÀÀÆ÷", "Page title and Browser name").arg(title));
+        setWindowTitle(tr("%1 - Qt Demo Browser", "Page title and Browser name").arg(title));
 #endif
     }
 }
@@ -632,8 +684,8 @@ void BrowserMainWindow::slotAboutApplication()
 
 void BrowserMainWindow::slotFileNew()
 {
-    BrowserApplication::instance()->newMainWindow();
-    BrowserMainWindow *mw = BrowserApplication::instance()->mainWindow();
+    BrowserAppCtx::instance()->newMainWindow();
+    BrowserMainWindow *mw = BrowserAppCtx::instance()->mainWindow();
     mw->slotHome();
 }
 
@@ -721,14 +773,14 @@ void BrowserMainWindow::printRequested(QWebEnginePage *page)
         slotHandlePagePrinted(false);
         return;
     }
-//    page->print(m_currentPrinter, invoke(this, &BrowserMainWindow::slotHandlePagePrinted));
+    page->print(m_currentPrinter, invoke(this, &BrowserMainWindow::slotHandlePagePrinted));
 #endif
 }
 #endif
 
 void BrowserMainWindow::slotPrivateBrowsing()
 {
-    if (!BrowserApplication::instance()->privateBrowsing()) {
+    if (!BrowserAppCtx::instance()->privateBrowsing()) {
         QString title = tr("Are you sure you want to turn on private browsing?");
         QString text = tr("<b>%1</b><br><br>"
             "This action will reload all open tabs.<br>"
@@ -746,10 +798,10 @@ void BrowserMainWindow::slotPrivateBrowsing()
                                QMessageBox::Ok);
 
         if (button == QMessageBox::Ok)
-            BrowserApplication::instance()->setPrivateBrowsing(true);
+            BrowserAppCtx::instance()->setPrivateBrowsing(true);
     } else {
         // TODO: Also ask here
-        BrowserApplication::instance()->setPrivateBrowsing(false);
+        BrowserAppCtx::instance()->setPrivateBrowsing(false);
     }
 }
 
@@ -918,7 +970,7 @@ void BrowserMainWindow::slotAboutToShowBackMenu()
         QWebEngineHistoryItem item = history->backItems(history->count()).at(i);
         QAction *action = new QAction(this);
         action->setData(-1*(historyCount-i-1));
-        QIcon icon = BrowserApplication::instance()->icon(item.url());
+        QIcon icon = BrowserAppCtx::instance()->icon(item.url());
         action->setIcon(icon);
         action->setText(item.title());
         m_historyBackMenu->addAction(action);
@@ -936,7 +988,7 @@ void BrowserMainWindow::slotAboutToShowForwardMenu()
         QWebEngineHistoryItem item = history->forwardItems(historyCount).at(i);
         QAction *action = new QAction(this);
         action->setData(historyCount-i);
-        QIcon icon = BrowserApplication::instance()->icon(item.url());
+        QIcon icon = BrowserAppCtx::instance()->icon(item.url());
         action->setIcon(icon);
         action->setText(item.title());
         m_historyForwardMenu->addAction(action);
@@ -952,7 +1004,7 @@ void BrowserMainWindow::slotAboutToShowWindowMenu()
     m_windowMenu->addAction(tr("Downloads"), this, SLOT(slotDownloadManager()), QKeySequence(tr("Alt+Ctrl+L", "Download Manager")));
     m_windowMenu->addSeparator();
 
-    QList<BrowserMainWindow*> windows = BrowserApplication::instance()->mainWindows();
+    QList<BrowserMainWindow*> windows = BrowserAppCtx::instance()->mainWindows();
     for (int i = 0; i < windows.count(); ++i) {
         BrowserMainWindow *window = windows.at(i);
         QAction *action = m_windowMenu->addAction(window->windowTitle(), this, SLOT(slotShowWindow()));
@@ -969,7 +1021,7 @@ void BrowserMainWindow::slotShowWindow()
         QVariant v = action->data();
         if (v.canConvert<int>()) {
             int offset = qvariant_cast<int>(v);
-            QList<BrowserMainWindow*> windows = BrowserApplication::instance()->mainWindows();
+            QList<BrowserMainWindow*> windows = BrowserAppCtx::instance()->mainWindows();
             windows.at(offset)->activateWindow();
             windows.at(offset)->currentTab()->setFocus();
         }

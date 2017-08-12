@@ -180,7 +180,7 @@ void HistoryManager::checkForExpired(bool removeEntriesDirectly)
 
 void HistoryManager::addHistoryItem(const HistoryItem &item)
 {
-    if (BrowserApplication::instance()->privateBrowsing())
+    if (BrowserAppCtx::instance()->privateBrowsing())
         return;
 
     emit entryAdded(item);
@@ -460,7 +460,7 @@ QVariant HistoryModel::data(const QModelIndex &index, int role) const
         }
     case Qt::DecorationRole:
         if (index.column() == 0) {
-            return BrowserApplication::instance()->icon(item.url);
+            return BrowserAppCtx::instance()->icon(item.url);
         }
     }
     return QVariant();
@@ -624,7 +624,7 @@ void HistoryMenu::activated(const QModelIndex &index)
 bool HistoryMenu::prePopulated()
 {
     if (!m_history) {
-        m_history = BrowserApplication::historyManager();
+        m_history = BrowserAppCtx::historyManager();
         m_historyMenuModel = new HistoryMenuModel(m_history->historyTreeModel(), this);
         setModel(m_historyMenuModel);
     }
@@ -682,7 +682,7 @@ HistoryDialog::HistoryDialog(QWidget *parent, HistoryManager *setHistory) : QDia
 {
     HistoryManager *history = setHistory;
     if (!history)
-        history = BrowserApplication::historyManager();
+        history = BrowserAppCtx::historyManager();
     setupUi(this);
     tree->setUniformRowHeights(true);
     tree->setSelectionBehavior(QAbstractItemView::SelectRows);

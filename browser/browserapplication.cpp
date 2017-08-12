@@ -1,7 +1,5 @@
 #include "stdafx.h"
 #include "browserapplication.h"
-#include <QLocalSocket>
-
 #include "bookmarks.h"
 #include "browsermainwindow.h"
 #include "cookiejar.h"
@@ -9,16 +7,36 @@
 #include "history.h"
 #include "tabwidget.h"
 #include "webview.h"
-#include "deps/fervor/fvupdater.h"
 
+#include <QtCore/QBuffer>
+#include <QtCore/QDir>
+#include <QtCore/QLibraryInfo>
+#include <QtCore/QSettings>
+#include <QtCore/QTextStream>
+#include <QtCore/QTranslator>
 
-DownloadManager *BrowserApplication::s_downloadManager = 0;
-HistoryManager *BrowserApplication::s_historyManager = 0;
-QNetworkAccessManager *BrowserApplication::s_networkAccessManager = 0;
-BookmarksManager *BrowserApplication::s_bookmarksManager = 0;
+#include <QtGui/QDesktopServices>
+#include <QtGui/QFileOpenEvent>
+#include <QtWidgets/QMessageBox>
 
-static void setUserStyleSheet(QWebEngineProfile *profile, 
-    const QString &styleSheet, BrowserMainWindow *mainWindow = 0)
+#include <QtNetwork/QLocalServer>
+#include <QtNetwork/QLocalSocket>
+#include <QtNetwork/QNetworkProxy>
+#include <QtNetwork/QSslSocket>
+
+#include <QWebEngineProfile>
+#include <QWebEngineSettings>
+#include <QWebEngineScript>
+#include <QWebEngineScriptCollection>
+
+#include <QtCore/QDebug>
+
+DownloadManager *BrowserAppCtx::s_downloadManager = 0;
+HistoryManager *BrowserAppCtx::s_historyManager = 0;
+QNetworkAccessManager *BrowserAppCtx::s_networkAccessManager = 0;
+BookmarksManager *BrowserAppCtx::s_bookmarksManager = 0;
+
+static void setUserStyleSheet(QWebEngineProfile *profile, const QString &styleSheet, BrowserMainWindow *wnd = 0)
 {
     Q_ASSERT(profile);
     QString scriptName(QStringLiteral("userStyleSheet"));
@@ -49,24 +67,19 @@ static void setUserStyleSheet(QWebEngineProfile *profile,
     profile->scripts()->insert(script);
     // run the script on the already loaded views
     // this has to be deferred as it could mess with the storage initialization on startup
-    if (mainWindow)
-        QMetaObject::invokeMethod(mainWindow, "runScriptOnOpenViews", Qt::QueuedConnection, Q_ARG(QString, source));
+    if (wnd)
+        QMetaObject::invokeMethod(wnd, "runScriptOnOpenViews", Qt::QueuedConnection, Q_ARG(QString, source));
 }
 
-BrowserApplication::BrowserApplication(int &argc, char **argv)
-    : QApplication(argc, argv)
-    , m_localServer(0)
-    , m_privateProfile(0)
+BrowserAppCtx::BrowserAppCtx(int &argc, char **argv)
+    : m_privateProfile(0)
     , m_privateBrowsing(false)
 {
-    net::KStartHttpDownloader();
-
-    QCoreApplication::setOrganizationName(QLatin1String("xiaocao.ren"));
-    QCoreApplication::setApplicationName(QLatin1String("xiaocao"));
-    QCoreApplication::setApplicationVersion(QLatin1String("1.0"));
-
+    QCoreApplication::setOrganizationName(QLatin1String("Qt"));
+    QCoreApplication::setApplicationName(QLatin1String("demobrowser"));
+    QCoreApplication::setApplicationVersion(QLatin1String("0.1"));
     QString serverName = QCoreApplication::applicationName()
-        + QString::fromLatin1(QT_VERSION_STR).remove('.') + QLatin1String("xiaocao");
+        + QString::fromLatin1(QT_VERSION_STR).remove('.') + QLatin1String("webengine");
     QLocalSocket socket;
     socket.connectToServer(serverName);
     if (socket.waitForConnected(500)) {
@@ -83,22 +96,12 @@ BrowserApplication::BrowserApplication(int &argc, char **argv)
     QApplication::setQuitOnLastWindowClosed(true);
 #endif
 
-    m_localServer = new QLocalServer(this);
-    connect(m_localServer, SIGNAL(newConnection()),
-            this, SLOT(newLocalSocketConnection()));
-    if (!m_localServer->listen(serverName)
-            && m_localServer->serverError() == QAbstractSocket::AddressInUseError) {
-        QLocalServer::removeServer(serverName);
-        if (!m_localServer->listen(serverName))
-            qWarning("Could not create local socket %s.", qPrintable(serverName));
+#ifndef QT_NO_OPENSSL
+    if (!QSslSocket::supportsSsl()) {
+    QMessageBox::information(0, "Demo Browser",
+                 "This system does not support OpenSSL. SSL websites will not be available.");
     }
-
-// #ifndef QT_NO_OPENSSL
-//     if (!QSslSocket::supportsSsl()) {
-//         QMessageBox::information(0, "Demo Browser",
-//                  "This system does not support OpenSSL. SSL websites will not be available.");
-//     }
-// #endif
+#endif
 
     QDesktopServices::setUrlHandler(QLatin1String("http"), this, "openUrl");
     QString localSysName = QLocale::system().name();
@@ -115,13 +118,11 @@ BrowserApplication::BrowserApplication(int &argc, char **argv)
             this, SLOT(lastWindowClosed()));
 #endif
 
-//    QTimer::singleShot(0, this, SLOT(postLaunch()));
+    QTimer::singleShot(0, this, SLOT(postLaunch()));
 }
 
-BrowserApplication::~BrowserApplication()
+BrowserAppCtx::~BrowserAppCtx()
 {
-    net::KShutdownHttpDownloader();
-
     delete s_downloadManager;
     for (int i = 0; i < m_mainWindows.size(); ++i) {
         BrowserMainWindow *window = m_mainWindows.at(i);
@@ -131,7 +132,7 @@ BrowserApplication::~BrowserApplication()
     delete s_bookmarksManager;
 }
 
-void BrowserApplication::lastWindowClosed()
+void BrowserAppCtx::lastWindowClosed()
 {
 #if defined(Q_OS_OSX)
     clean();
@@ -141,17 +142,12 @@ void BrowserApplication::lastWindowClosed()
 #endif
 }
 
-BrowserApplication *BrowserApplication::instance()
+BrowserAppCtx *BrowserAppCtx::instance()
 {
-    return (static_cast<BrowserApplication *>(QCoreApplication::instance()));
+    return (static_cast<BrowserAppCtx *>(QCoreApplication::instance()));
 }
 
-bool BrowserApplication::checkUpdate()
-{
-    return FvUpdater::sharedUpdater()->CheckForUpdatesNotSilent();
-}
-
-void BrowserApplication::quitBrowser()
+void BrowserAppCtx::quitBrowser()
 {
 #if defined(Q_OS_OSX)
     clean();
@@ -177,7 +173,7 @@ void BrowserApplication::quitBrowser()
 /*!
     Any actions that can be delayed until the window is visible
  */
-void BrowserApplication::postLaunch()
+void BrowserAppCtx::postLaunch()
 {
     QString directory = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     if (directory.isEmpty())
@@ -201,10 +197,10 @@ void BrowserApplication::postLaunch()
         }
 
     }
-    BrowserApplication::historyManager();
+    BrowserAppCtx::historyManager();
 }
 
-void BrowserApplication::loadSettings()
+void BrowserAppCtx::loadSettings()
 {
     QSettings settings;
     settings.beginGroup(QLatin1String("websettings"));
@@ -274,12 +270,12 @@ void BrowserApplication::loadSettings()
         proxy.setPort(settings.value(QLatin1String("port"), 1080).toInt());
         proxy.setUser(settings.value(QLatin1String("userName")).toString());
         proxy.setPassword(settings.value(QLatin1String("password")).toString());
+        QNetworkProxy::setApplicationProxy(proxy);
     }
-    QNetworkProxy::setApplicationProxy(proxy);
     settings.endGroup();
 }
 
-QList<BrowserMainWindow*> BrowserApplication::mainWindows()
+QList<BrowserMainWindow*> BrowserAppCtx::mainWindows()
 {
     clean();
     QList<BrowserMainWindow*> list;
@@ -288,7 +284,7 @@ QList<BrowserMainWindow*> BrowserApplication::mainWindows()
     return list;
 }
 
-void BrowserApplication::clean()
+void BrowserAppCtx::clean()
 {
     // cleanup any deleted main windows first
     for (int i = m_mainWindows.count() - 1; i >= 0; --i)
@@ -296,7 +292,7 @@ void BrowserApplication::clean()
             m_mainWindows.removeAt(i);
 }
 
-void BrowserApplication::saveSession()
+void BrowserAppCtx::saveSession()
 {
     if (m_privateBrowsing)
         return;
@@ -318,12 +314,12 @@ void BrowserApplication::saveSession()
     settings.endGroup();
 }
 
-bool BrowserApplication::canRestoreSession() const
+bool BrowserAppCtx::canRestoreSession() const
 {
     return !m_lastSession.isEmpty();
 }
 
-void BrowserApplication::restoreLastSession()
+void BrowserAppCtx::restoreLastSession()
 {
     QList<QByteArray> windows;
     QBuffer buffer(&m_lastSession);
@@ -349,19 +345,19 @@ void BrowserApplication::restoreLastSession()
     }
 }
 
-bool BrowserApplication::isTheOnlyBrowser() const
+bool BrowserAppCtx::isTheOnlyBrowser() const
 {
     return (m_localServer != 0);
 }
 
-void BrowserApplication::installTranslator(const QString &name)
+void BrowserAppCtx::installTranslator(const QString &name)
 {
     QTranslator *translator = new QTranslator(this);
     translator->load(name, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
     QApplication::installTranslator(translator);
 }
 
-QString BrowserApplication::getCommandLineUrlArgument() const
+QString BrowserAppCtx::getCommandLineUrlArgument() const
 {
     const QStringList args = QCoreApplication::arguments();
     if (args.count() > 1) {
@@ -375,7 +371,7 @@ QString BrowserApplication::getCommandLineUrlArgument() const
 }
 
 #if defined(Q_OS_OSX)
-bool BrowserApplication::event(QEvent* event)
+bool BrowserAppCtx::event(QEvent* event)
 {
     switch (event->type()) {
     case QEvent::ApplicationActivate: {
@@ -400,12 +396,12 @@ bool BrowserApplication::event(QEvent* event)
 }
 #endif
 
-void BrowserApplication::openUrl(const QUrl &url)
+void BrowserAppCtx::openUrl(const QUrl &url)
 {
     mainWindow()->loadPage(url.toString());
 }
 
-BrowserMainWindow *BrowserApplication::newMainWindow()
+BrowserMainWindow *BrowserAppCtx::newMainWindow()
 {
     BrowserMainWindow *browser = new BrowserMainWindow();
     m_mainWindows.prepend(browser);
@@ -413,7 +409,7 @@ BrowserMainWindow *BrowserApplication::newMainWindow()
     return browser;
 }
 
-BrowserMainWindow *BrowserApplication::mainWindow()
+BrowserMainWindow *BrowserAppCtx::mainWindow()
 {
     clean();
     if (m_mainWindows.isEmpty())
@@ -421,32 +417,7 @@ BrowserMainWindow *BrowserApplication::mainWindow()
     return m_mainWindows[0];
 }
 
-void BrowserApplication::newLocalSocketConnection()
-{
-    QLocalSocket *socket = m_localServer->nextPendingConnection();
-    if (!socket)
-        return;
-    socket->waitForReadyRead(1000);
-    QTextStream stream(socket);
-    QString url;
-    stream >> url;
-    if (!url.isEmpty()) {
-        QSettings settings;
-        settings.beginGroup(QLatin1String("general"));
-        int openLinksIn = settings.value(QLatin1String("openLinksIn"), 0).toInt();
-        settings.endGroup();
-        if (openLinksIn == 1)
-            newMainWindow();
-        else
-            mainWindow()->tabWidget()->newTab();
-        openUrl(url);
-    }
-    delete socket;
-    mainWindow()->raise();
-    mainWindow()->activateWindow();
-}
-
-CookieJar *BrowserApplication::cookieJar()
+CookieJar *BrowserAppCtx::cookieJar()
 {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
     return (CookieJar*)networkAccessManager()->cookieJar();
@@ -455,7 +426,7 @@ CookieJar *BrowserApplication::cookieJar()
 #endif
 }
 
-DownloadManager *BrowserApplication::downloadManager()
+DownloadManager *BrowserAppCtx::downloadManager()
 {
     if (!s_downloadManager) {
         s_downloadManager = new DownloadManager();
@@ -463,7 +434,7 @@ DownloadManager *BrowserApplication::downloadManager()
     return s_downloadManager;
 }
 
-QNetworkAccessManager *BrowserApplication::networkAccessManager()
+QNetworkAccessManager *BrowserAppCtx::networkAccessManager()
 {
     if (!s_networkAccessManager) {
         s_networkAccessManager = new QNetworkAccessManager();
@@ -471,14 +442,14 @@ QNetworkAccessManager *BrowserApplication::networkAccessManager()
     return s_networkAccessManager;
 }
 
-HistoryManager *BrowserApplication::historyManager()
+HistoryManager *BrowserAppCtx::historyManager()
 {
     if (!s_historyManager)
         s_historyManager = new HistoryManager();
     return s_historyManager;
 }
 
-BookmarksManager *BrowserApplication::bookmarksManager()
+BookmarksManager *BrowserAppCtx::bookmarksManager()
 {
     if (!s_bookmarksManager) {
         s_bookmarksManager = new BookmarksManager;
@@ -486,7 +457,7 @@ BookmarksManager *BrowserApplication::bookmarksManager()
     return s_bookmarksManager;
 }
 
-QIcon BrowserApplication::icon(const QUrl &url) const
+QIcon BrowserAppCtx::icon(const QUrl &url) const
 {
 #if defined(QTWEBENGINE_ICONDATABASE)
     QIcon icon = QWebEngineSettings::iconForUrl(url);
@@ -498,14 +469,14 @@ QIcon BrowserApplication::icon(const QUrl &url) const
     return defaultIcon();
 }
 
-QIcon BrowserApplication::defaultIcon() const
+QIcon BrowserAppCtx::defaultIcon() const
 {
     if (m_defaultIcon.isNull())
         m_defaultIcon = QIcon(QLatin1String(":defaulticon.png"));
     return m_defaultIcon;
 }
 
-void BrowserApplication::setPrivateBrowsing(bool privateBrowsing)
+void BrowserAppCtx::setPrivateBrowsing(bool privateBrowsing)
 {
     if (m_privateBrowsing == privateBrowsing)
         return;
@@ -519,7 +490,7 @@ void BrowserApplication::setPrivateBrowsing(bool privateBrowsing)
     } else {
         Q_FOREACH (BrowserMainWindow* window, mainWindows()) {
             window->tabWidget()->setProfile(QWebEngineProfile::defaultProfile());
-            window->m_lastSearch = QString::null;
+            window->m_lastSearch = QString();
             window->tabWidget()->clear();
         }
     }

@@ -350,7 +350,7 @@ void DownloadManager::updateRow()
 
     bool remove = false;
     if (!widget->downloading()
-        && BrowserApplication::instance()->privateBrowsing())
+        && BrowserAppCtx::instance()->privateBrowsing())
         remove = true;
 
     if (widget->downloadedSuccessfully()

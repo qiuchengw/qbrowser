@@ -149,7 +149,7 @@ QUrl WebView::url() const
 void WebView::onIconChanged(const QIcon &icon)
 {
     if (icon.isNull())
-        emit iconChanged(BrowserApplication::instance()->defaultIcon());
+        emit iconChanged(BrowserAppCtx::instance()->defaultIcon());
     else
         emit iconChanged(icon);
 }

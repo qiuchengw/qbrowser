@@ -14,7 +14,7 @@ WebPage::WebPage(QWebEngineProfile *profile, QObject *parent)
     , m_pressedButtons(Qt::NoButton)
 {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
-    setNetworkAccessManager(BrowserApplication::networkAccessManager());
+    setNetworkAccessManager(BrowserAppCtx::networkAccessManager());
 #endif
 #if defined(QWEBENGINEPAGE_UNSUPPORTEDCONTENT)
     connect(this, SIGNAL(unsupportedContent(QNetworkReply*)),
@@ -34,7 +34,7 @@ BrowserMainWindow *WebPage::mainWindow()
             return mw;
         w = w->parent();
     }
-    return BrowserApplication::instance()->mainWindow();
+    return BrowserAppCtx::instance()->mainWindow();
 }
 
 bool WebPage::certificateError(const QWebEngineCertificateError &error)
@@ -67,8 +67,8 @@ QWebEnginePage *WebPage::createWindow(QWebEnginePage::WebWindowType type)
         return mainWindow()->tabWidget()->newTab(false)->page();
     }
     else if (type == QWebEnginePage::WebBrowserWindow) {
-        BrowserApplication::instance()->newMainWindow();
-        BrowserMainWindow *mainWindow = BrowserApplication::instance()->mainWindow();
+        BrowserAppCtx::instance()->newMainWindow();
+        BrowserMainWindow *mainWindow = BrowserAppCtx::instance()->mainWindow();
         return mainWindow->currentTab()->page();
     }
     else {
@@ -146,7 +146,7 @@ void WebPage::handleUnsupportedContent(QNetworkReply *reply)
 
 void WebPage::authenticationRequired(const QUrl &requestUrl, QAuthenticator *auth)
 {
-    BrowserMainWindow *mainWindow = BrowserApplication::instance()->mainWindow();
+    BrowserMainWindow *mainWindow = BrowserAppCtx::instance()->mainWindow();
 
     QDialog dialog(mainWindow);
     dialog.setWindowFlags(Qt::Sheet);
@@ -175,7 +175,7 @@ void WebPage::authenticationRequired(const QUrl &requestUrl, QAuthenticator *aut
 void WebPage::proxyAuthenticationRequired(const QUrl &requestUrl, QAuthenticator *auth, const QString &proxyHost)
 {
     Q_UNUSED(requestUrl);
-    BrowserMainWindow *mainWindow = BrowserApplication::instance()->mainWindow();
+    BrowserMainWindow *mainWindow = BrowserAppCtx::instance()->mainWindow();
 
     QDialog dialog(mainWindow);
     dialog.setWindowFlags(Qt::Sheet);

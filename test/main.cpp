@@ -2,10 +2,15 @@
 #include "test.h"
 #include <QtWidgets/QApplication>
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
-    QApplication a(argc, argv);
-    test w;
-    w.show();
-    return a.exec();
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    Q_INIT_RESOURCE(data);
+    BrowserApplication application(argc, argv);
+    if (!application.isTheOnlyBrowser())
+        return 0;
+
+    application.newMainWindow();
+    return application.exec();
 }
+

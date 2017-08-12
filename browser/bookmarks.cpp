@@ -468,7 +468,7 @@ QVariant BookmarksModel::data(const QModelIndex &index, int role) const
         if (index.column() == 0) {
             if (bookmarkNode->type() == BookmarkNode::Folder)
                 return QApplication::style()->standardIcon(QStyle::SP_DirIcon);
-            return BrowserApplication::instance()->icon(bookmarkNode->url);
+            return BrowserAppCtx::instance()->icon(bookmarkNode->url);
         }
     }
 
@@ -686,7 +686,7 @@ AddBookmarkDialog::AddBookmarkDialog(const QString &url, const QString &title, Q
 {
     setWindowFlags(Qt::Sheet);
     if (!m_bookmarksManager)
-        m_bookmarksManager = BrowserApplication::bookmarksManager();
+        m_bookmarksManager = BrowserAppCtx::bookmarksManager();
     setupUi(this);
     QTreeView *view = new QTreeView(this);
     m_proxyModel = new AddBookmarkProxyModel(this);
@@ -741,7 +741,7 @@ void BookmarksMenu::activated(const QModelIndex &index)
 
 bool BookmarksMenu::prePopulated()
 {
-    m_bookmarksManager = BrowserApplication::bookmarksManager();
+    m_bookmarksManager = BrowserAppCtx::bookmarksManager();
     setModel(m_bookmarksManager->bookmarksModel());
     setRootIndex(m_bookmarksManager->bookmarksModel()->index(1, 0));
     // initial actions
@@ -765,7 +765,7 @@ BookmarksDialog::BookmarksDialog(QWidget *parent, BookmarksManager *manager)
 {
     m_bookmarksManager = manager;
     if (!m_bookmarksManager)
-        m_bookmarksManager = BrowserApplication::bookmarksManager();
+        m_bookmarksManager = BrowserAppCtx::bookmarksManager();
     setupUi(this);
 
     tree->setUniformRowHeights(true);

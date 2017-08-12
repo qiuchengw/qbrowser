@@ -71,17 +71,16 @@ class BrowserMainWindow;
 class CookieJar;
 class DownloadManager;
 class HistoryManager;
-class BrowserApplication : public QApplication
-{
-    Q_OBJECT
 
+class BrowserAppCtx
+{
 public:
-    BrowserApplication(int &argc, char **argv);
-    ~BrowserApplication();
-    static BrowserApplication *instance();
+    BrowserAppCtx(int &argc, char **argv);
+
+    ~BrowserAppCtx();
+    static BrowserAppCtx *instance();
     void loadSettings();
 
-    bool isTheOnlyBrowser() const;
     BrowserMainWindow *mainWindow();
     QList<BrowserMainWindow*> mainWindows();
     QIcon icon(const QUrl &url) const;
@@ -114,7 +113,6 @@ signals:
 private slots:
     void postLaunch();
     void openUrl(const QUrl &url);
-    void newLocalSocketConnection();
 
 private:
     void clean();
@@ -127,7 +125,6 @@ private:
     static BookmarksManager *s_bookmarksManager;
 
     QList<QPointer<BrowserMainWindow> > m_mainWindows;
-    QLocalServer *m_localServer;
     QByteArray m_lastSession;
     QWebEngineProfile *m_privateProfile;
     bool m_privateBrowsing;

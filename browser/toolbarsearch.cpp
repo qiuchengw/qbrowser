@@ -111,7 +111,7 @@ void ToolbarSearch::searchNow()
     if (newList.size() >= m_maxSavedSearches)
         newList.removeLast();
 
-    if (!BrowserApplication::instance()->privateBrowsing()) {
+    if (!BrowserAppCtx::instance()->privateBrowsing()) {
         m_stringListModel->setStringList(newList);
         m_autosaver->changeOccurred();
     }

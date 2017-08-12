@@ -252,11 +252,11 @@ void SettingsDialog::saveToSettings()
     settings.setValue(QLatin1String("password"), proxyPassword->text());
     settings.endGroup();
 
-    BrowserApplication::instance()->loadSettings();
+    BrowserAppCtx::instance()->loadSettings();
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
-    BrowserApplication::cookieJar()->loadSettings();
+    BrowserAppCtx::cookieJar()->loadSettings();
 #endif
-    BrowserApplication::historyManager()->loadSettings();
+    BrowserAppCtx::historyManager()->loadSettings();
 }
 
 void SettingsDialog::accept()
@@ -268,7 +268,7 @@ void SettingsDialog::accept()
 void SettingsDialog::showCookies()
 {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
-    CookiesDialog *dialog = new CookiesDialog(BrowserApplication::cookieJar(), this);
+    CookiesDialog *dialog = new CookiesDialog(BrowserAppCtx::cookieJar(), this);
     dialog->exec();
 #endif
 }
@@ -276,7 +276,7 @@ void SettingsDialog::showCookies()
 void SettingsDialog::showExceptions()
 {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
-    CookiesExceptionsDialog *dialog = new CookiesExceptionsDialog(BrowserApplication::cookieJar(), this);
+    CookiesExceptionsDialog *dialog = new CookiesExceptionsDialog(BrowserAppCtx::cookieJar(), this);
     dialog->exec();
 #endif
 }

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "browser", "browser\browser.vcxproj", "{673CFA89-D572-45BF-B676-9E79FF8EF6C0}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "browser", "browser\browser.vcxproj", "{667104C3-DEAB-494F-968B-56A686E21BCF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{673CFA89-D572-45BF-B676-9E79FF8EF6C0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{673CFA89-D572-45BF-B676-9E79FF8EF6C0}.Debug|Win32.Build.0 = Debug|Win32
-		{673CFA89-D572-45BF-B676-9E79FF8EF6C0}.Release|Win32.ActiveCfg = Release|Win32
-		{673CFA89-D572-45BF-B676-9E79FF8EF6C0}.Release|Win32.Build.0 = Release|Win32
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|Win32.ActiveCfg = Debug|Win32
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|Win32.Build.0 = Debug|Win32
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|Win32.ActiveCfg = Release|Win32
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|Win32.Build.0 = Release|Win32
+		{667104C3-DEAB-494F-968B-56A686E21BCF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{667104C3-DEAB-494F-968B-56A686E21BCF}.Debug|Win32.Build.0 = Debug|Win32
+		{667104C3-DEAB-494F-968B-56A686E21BCF}.Release|Win32.ActiveCfg = Release|Win32
+		{667104C3-DEAB-494F-968B-56A686E21BCF}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
