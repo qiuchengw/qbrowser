@@ -18,6 +18,7 @@ class ChaseWidget;
 class TabWidget;
 class ToolbarSearch;
 class WebView;
+class WorkerStack;
 
 class BrowserFunctionPanel;
 class BrowserWnd : public QMainWindow {
@@ -113,6 +114,7 @@ private:
     BookmarksToolBar *m_bookmarksToolbar;
     ChaseWidget *m_chaseWidget;
     TabWidget *m_tabWidget;
+    WorkerStack* m_workerstack;
     AutoSaver *m_autoSaver;
 
     QAction *m_historyBack;

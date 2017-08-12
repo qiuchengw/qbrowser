@@ -13,26 +13,7 @@
 #include "toolbarsearch.h"
 #include "ui_passworddialog.h"
 #include "webview.h"
-
-#include <QtCore/QSettings>
-
-#include <QtWidgets/QDesktopWidget>
-#include <QtWidgets/QFileDialog>
-#include <QtWidgets/QPlainTextEdit>
-#include <QtPrintSupport/QPrintDialog>
-#include <QtPrintSupport/QPrintPreviewDialog>
-#include <QtPrintSupport/QPrinter>
-#include <QtWidgets/QMenuBar>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QStatusBar>
-#include <QtWidgets/QToolBar>
-#include <QtWidgets/QInputDialog>
-
-#include <QWebEngineHistory>
-#include <QWebEngineProfile>
-#include <QWebEngineSettings>
-
-#include <QtCore/QDebug>
+#include "workerstack.h"
 
 template<typename Arg, typename R, typename C>
 struct InvokeWrapper {
@@ -55,6 +36,7 @@ const char *BrowserWnd::DEFAULT_HOME = "about:blank";
 BrowserWnd::BrowserWnd(QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
     , m_tabWidget(new TabWidget(this))
+    , m_workerstack(new WorkerStack(this, m_tabWidget))
     , m_autoSaver(new AutoSaver(this))
     , m_historyBack(0)
     , m_historyForward(0)
@@ -88,7 +70,14 @@ BrowserWnd::BrowserWnd(QWidget *parent, Qt::WindowFlags flags)
     addToolBarBreak();
     addToolBar(m_bookmarksToolbar);
 #endif
-    layout->addWidget(m_tabWidget);
+
+    QSplitter *spliter = new QSplitter(this);
+    spliter->setHandleWidth(4);
+    spliter->setOrientation(Qt::Horizontal);
+    spliter->addWidget(m_tabWidget);
+    spliter->addWidget(m_workerstack);
+
+    layout->addWidget(spliter, 1);
     centralWidget->setLayout(layout);
     setCentralWidget(centralWidget);
 
@@ -139,7 +128,7 @@ BrowserWnd::~BrowserWnd()
 
 void BrowserWnd::addFunctionPanel(BrowserFunctionPanel* panel)
 {
-
+    m_workerstack->addPanel(panel);
 }
 
 void BrowserWnd::loadDefaultState()
