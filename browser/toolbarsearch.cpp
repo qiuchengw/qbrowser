@@ -51,7 +51,7 @@
 #include "stdafx.h"
 #include "toolbarsearch.h"
 #include "autosaver.h"
-#include "browserapplication.h"
+#include "browserservice.h"
 
 
 /*
@@ -111,7 +111,7 @@ void ToolbarSearch::searchNow()
     if (newList.size() >= m_maxSavedSearches)
         newList.removeLast();
 
-    if (!BrowserAppCtx::instance()->privateBrowsing()) {
+    if (!BrowserService::instance()->privateBrowsing()) {
         m_stringListModel->setStringList(newList);
         m_autosaver->changeOccurred();
     }

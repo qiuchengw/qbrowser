@@ -2,15 +2,22 @@
 #include "test.h"
 #include <QtWidgets/QApplication>
 
+#include "../browser/browser.h"
+#pragma comment(lib, "browser.lib")
+
+
+void test_browser() {
+    BROWSER_HANDLE h = createBrowser();
+}
+
 int main(int argc, char **argv)
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    Q_INIT_RESOURCE(data);
-    BrowserApplication application(argc, argv);
-    if (!application.isTheOnlyBrowser())
-        return 0;
+    QApplication app(argc, argv);
+    // Q_INIT_RESOURCE(data);
 
-    application.newMainWindow();
-    return application.exec();
+    test_browser();
+
+    return app.exec();
 }
 

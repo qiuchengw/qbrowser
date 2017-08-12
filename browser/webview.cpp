@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "webview.h"
-#include "browserapplication.h"
+#include "browserservice.h"
 #include "cookiejar.h"
 #include "downloadmanager.h"
 #include "featurepermissionbar.h"
@@ -149,7 +149,7 @@ QUrl WebView::url() const
 void WebView::onIconChanged(const QIcon &icon)
 {
     if (icon.isNull())
-        emit iconChanged(BrowserAppCtx::instance()->defaultIcon());
+        emit iconChanged(BrowserService::instance()->defaultIcon());
     else
         emit iconChanged(icon);
 }

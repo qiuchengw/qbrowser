@@ -51,7 +51,7 @@
 #include "stdafx.h"
 #include "urllineedit.h"
 
-#include "browserapplication.h"
+#include "browserservice.h"
 #include "searchlineedit.h"
 #include "webview.h"
 

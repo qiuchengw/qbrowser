@@ -48,11 +48,11 @@
 **
 ****************************************************************************/
 #include "stdafx.h"
-#include "browsermainwindow.h"
+#include "browserwnd.h"
 
 #include "autosaver.h"
 #include "bookmarks.h"
-#include "browserapplication.h"
+#include "browserservice.h"
 #include "chasewidget.h"
 #include "downloadmanager.h"
 #include "history.h"
@@ -99,9 +99,9 @@ InvokeWrapper<Arg, R, C> invoke(R *receiver, void (C::*memberFun)(Arg))
     return wrapper;
 }
 
-const char *BrowserMainWindow::defaultHome = "http://qt.io/";
+const char *BrowserWnd::defaultHome = "http://qt.io/";
 
-BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
+BrowserWnd::BrowserWnd(QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
     , m_tabWidget(new TabWidget(this))
     , m_autoSaver(new AutoSaver(this))
@@ -120,7 +120,7 @@ BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
     setupToolBar();
 
     QWidget *centralWidget = new QWidget(this);
-    BookmarksModel *bookmarksModel = BrowserAppCtx::bookmarksManager()->bookmarksModel();
+    BookmarksModel *bookmarksModel = BrowserService::bookmarksManager()->bookmarksModel();
     m_bookmarksToolbar = new BookmarksToolBar(bookmarksModel, this);
     connect(m_bookmarksToolbar, SIGNAL(openUrl(QUrl)),
             m_tabWidget, SLOT(loadUrlInCurrentTab(QUrl)));
@@ -180,13 +180,13 @@ BrowserMainWindow::BrowserMainWindow(QWidget *parent, Qt::WindowFlags flags)
 
 }
 
-BrowserMainWindow::~BrowserMainWindow()
+BrowserWnd::~BrowserWnd()
 {
     m_autoSaver->changeOccurred();
     m_autoSaver->saveIfNeccessary();
 }
 
-void BrowserMainWindow::loadDefaultState()
+void BrowserWnd::loadDefaultState()
 {
     QSettings settings;
     settings.beginGroup(QLatin1String("BrowserMainWindow"));
@@ -195,16 +195,16 @@ void BrowserMainWindow::loadDefaultState()
     settings.endGroup();
 }
 
-QSize BrowserMainWindow::sizeHint() const
+QSize BrowserWnd::sizeHint() const
 {
     QRect desktopRect = QApplication::desktop()->screenGeometry();
     QSize size = desktopRect.size() * qreal(0.9);
     return size;
 }
 
-void BrowserMainWindow::save()
+void BrowserWnd::save()
 {
-    BrowserAppCtx::instance()->saveSession();
+    BrowserService::instance()->saveSession();
 
     QSettings settings;
     settings.beginGroup(QLatin1String("BrowserMainWindow"));
@@ -215,7 +215,7 @@ void BrowserMainWindow::save()
 
 static const qint32 BrowserMainWindowMagic = 0xba;
 
-QByteArray BrowserMainWindow::saveState(bool withTabs) const
+QByteArray BrowserWnd::saveState(bool withTabs) const
 {
     int version = 2;
     QByteArray data;
@@ -235,7 +235,7 @@ QByteArray BrowserMainWindow::saveState(bool withTabs) const
     return data;
 }
 
-bool BrowserMainWindow::restoreState(const QByteArray &state)
+bool BrowserWnd::restoreState(const QByteArray &state)
 {
     int version = 2;
     QByteArray sd = state;
@@ -279,13 +279,13 @@ bool BrowserMainWindow::restoreState(const QByteArray &state)
     return true;
 }
 
-void BrowserMainWindow::runScriptOnOpenViews(const QString &source)
+void BrowserWnd::runScriptOnOpenViews(const QString &source)
 {
     for (int i =0; i < tabWidget()->count(); ++i)
         tabWidget()->webView(i)->page()->runJavaScript(source);
 }
 
-void BrowserMainWindow::setupMenu()
+void BrowserWnd::setupMenu()
 {
     new QShortcut(QKeySequence(Qt::Key_F6), this, SLOT(slotSwapFocus()));
 
@@ -305,7 +305,7 @@ void BrowserMainWindow::setupMenu()
                 SLOT(slotFileSaveAs()), QKeySequence(QKeySequence::Save));
     fileMenu->addSeparator();
 #endif
-    BookmarksManager *bookmarksManager = BrowserAppCtx::bookmarksManager();
+    BookmarksManager *bookmarksManager = BrowserService::bookmarksManager();
     fileMenu->addAction(tr("&Import Bookmarks..."), bookmarksManager, SLOT(importBookmarks()));
     fileMenu->addAction(tr("&Export Bookmarks..."), bookmarksManager, SLOT(exportBookmarks()));
     fileMenu->addSeparator();
@@ -320,12 +320,12 @@ void BrowserMainWindow::setupMenu()
 
     QAction *action = fileMenu->addAction(tr("Private &Browsing..."), this, SLOT(slotPrivateBrowsing()));
     action->setCheckable(true);
-    action->setChecked(BrowserAppCtx::instance()->privateBrowsing());
-    connect(BrowserAppCtx::instance(), SIGNAL(privateBrowsingChanged(bool)), action, SLOT(setChecked(bool)));
+    action->setChecked(BrowserService::instance()->privateBrowsing());
+    connect(BrowserService::instance(), SIGNAL(privateBrowsingChanged(bool)), action, SLOT(setChecked(bool)));
     fileMenu->addSeparator();
 
 #if defined(Q_OS_OSX)
-    fileMenu->addAction(tr("&Quit"), BrowserAppCtx::instance(), SLOT(quitBrowser()), QKeySequence(Qt::CTRL | Qt::Key_Q));
+    fileMenu->addAction(tr("&Quit"), BrowserService::instance(), SLOT(quitBrowser()), QKeySequence(Qt::CTRL | Qt::Key_Q));
 #else
     fileMenu->addAction(tr("&Quit"), this, SLOT(close()), QKeySequence(Qt::CTRL | Qt::Key_Q));
 #endif
@@ -458,8 +458,8 @@ void BrowserMainWindow::setupMenu()
 
 #if defined(QWEBENGINEHISTORY_RESTORESESSION)
     m_restoreLastSession = new QAction(tr("Restore Last Session"), this);
-    connect(m_restoreLastSession, SIGNAL(triggered()), BrowserAppCtx::instance(), SLOT(restoreLastSession()));
-    m_restoreLastSession->setEnabled(BrowserAppCtx::instance()->canRestoreSession());
+    connect(m_restoreLastSession, SIGNAL(triggered()), BrowserService::instance(), SLOT(restoreLastSession()));
+    m_restoreLastSession->setEnabled(BrowserService::instance()->canRestoreSession());
     historyActions.append(m_tabWidget->recentlyClosedTabsAction());
     historyActions.append(m_restoreLastSession);
 #endif
@@ -507,7 +507,7 @@ void BrowserMainWindow::setupMenu()
     helpMenu->addAction(tr("About &Demo Browser"), this, SLOT(slotAboutApplication()));
 }
 
-void BrowserMainWindow::setupToolBar()
+void BrowserWnd::setupToolBar()
 {
     m_navigationBar = addToolBar(tr("Navigation"));
     connect(m_navigationBar->toggleViewAction(), SIGNAL(toggled(bool)),
@@ -547,7 +547,7 @@ void BrowserMainWindow::setupToolBar()
     m_navigationBar->addWidget(m_chaseWidget);
 }
 
-void BrowserMainWindow::slotShowBookmarksDialog()
+void BrowserWnd::slotShowBookmarksDialog()
 {
     BookmarksDialog *dialog = new BookmarksDialog(this);
     connect(dialog, SIGNAL(openUrl(QUrl)),
@@ -555,7 +555,7 @@ void BrowserMainWindow::slotShowBookmarksDialog()
     dialog->show();
 }
 
-void BrowserMainWindow::slotAddBookmark()
+void BrowserWnd::slotAddBookmark()
 {
     WebView *webView = currentTab();
     QString url = webView->url().toString();
@@ -564,7 +564,7 @@ void BrowserMainWindow::slotAddBookmark()
     dialog.exec();
 }
 
-void BrowserMainWindow::slotViewToolbar()
+void BrowserWnd::slotViewToolbar()
 {
     if (m_navigationBar->isVisible()) {
         updateToolbarActionText(false);
@@ -576,7 +576,7 @@ void BrowserMainWindow::slotViewToolbar()
     m_autoSaver->changeOccurred();
 }
 
-void BrowserMainWindow::slotViewBookmarksBar()
+void BrowserWnd::slotViewBookmarksBar()
 {
     if (m_bookmarksToolbar->isVisible()) {
         updateBookmarksToolbarActionText(false);
@@ -588,28 +588,28 @@ void BrowserMainWindow::slotViewBookmarksBar()
     m_autoSaver->changeOccurred();
 }
 
-void BrowserMainWindow::updateStatusbarActionText(bool visible)
+void BrowserWnd::updateStatusbarActionText(bool visible)
 {
     m_viewStatusbar->setText(!visible ? tr("Show Status Bar") : tr("Hide Status Bar"));
 }
 
-void BrowserMainWindow::handleFindTextResult(bool found)
+void BrowserWnd::handleFindTextResult(bool found)
 {
     if (!found)
         slotUpdateStatusbar(tr("\"%1\" not found.").arg(m_lastSearch));
 }
 
-void BrowserMainWindow::updateToolbarActionText(bool visible)
+void BrowserWnd::updateToolbarActionText(bool visible)
 {
     m_viewToolbar->setText(!visible ? tr("Show Toolbar") : tr("Hide Toolbar"));
 }
 
-void BrowserMainWindow::updateBookmarksToolbarActionText(bool visible)
+void BrowserWnd::updateBookmarksToolbarActionText(bool visible)
 {
     m_viewBookmarkBar->setText(!visible ? tr("Show Bookmarks bar") : tr("Hide Bookmarks bar"));
 }
 
-void BrowserMainWindow::slotViewStatusbar()
+void BrowserWnd::slotViewStatusbar()
 {
     if (statusBar()->isVisible()) {
         updateStatusbarActionText(false);
@@ -621,7 +621,7 @@ void BrowserMainWindow::slotViewStatusbar()
     m_autoSaver->changeOccurred();
 }
 
-void BrowserMainWindow::loadUrl(const QUrl &url)
+void BrowserWnd::loadUrl(const QUrl &url)
 {
     if (!currentTab() || !url.isValid())
         return;
@@ -630,34 +630,34 @@ void BrowserMainWindow::loadUrl(const QUrl &url)
     m_tabWidget->loadUrlInCurrentTab(url);
 }
 
-void BrowserMainWindow::slotDownloadManager()
+void BrowserWnd::slotDownloadManager()
 {
-    BrowserAppCtx::downloadManager()->show();
+    BrowserService::downloadManager()->show();
 }
 
-void BrowserMainWindow::slotSelectLineEdit()
+void BrowserWnd::slotSelectLineEdit()
 {
     m_tabWidget->currentLineEdit()->selectAll();
     m_tabWidget->currentLineEdit()->setFocus();
 }
 
-void BrowserMainWindow::slotFileSaveAs()
+void BrowserWnd::slotFileSaveAs()
 {
     // not implemented yet.
 }
 
-void BrowserMainWindow::slotPreferences()
+void BrowserWnd::slotPreferences()
 {
     SettingsDialog *s = new SettingsDialog(this);
     s->show();
 }
 
-void BrowserMainWindow::slotUpdateStatusbar(const QString &string)
+void BrowserWnd::slotUpdateStatusbar(const QString &string)
 {
     statusBar()->showMessage(string, 2000);
 }
 
-void BrowserMainWindow::slotUpdateWindowTitle(const QString &title)
+void BrowserWnd::slotUpdateWindowTitle(const QString &title)
 {
     if (title.isEmpty()) {
         setWindowTitle(tr("Qt Demo Browser"));
@@ -670,7 +670,7 @@ void BrowserMainWindow::slotUpdateWindowTitle(const QString &title)
     }
 }
 
-void BrowserMainWindow::slotAboutApplication()
+void BrowserWnd::slotAboutApplication()
 {
     QMessageBox::about(this, tr("About"), tr(
         "Version %1"
@@ -682,14 +682,14 @@ void BrowserMainWindow::slotAboutApplication()
         ).arg(QCoreApplication::applicationVersion()));
 }
 
-void BrowserMainWindow::slotFileNew()
+void BrowserWnd::slotFileNew()
 {
-    BrowserAppCtx::instance()->newMainWindow();
-    BrowserMainWindow *mw = BrowserAppCtx::instance()->mainWindow();
+    BrowserService::instance()->newBroswer();
+    BrowserWnd *mw = BrowserService::instance()->browser();
     mw->slotHome();
 }
 
-void BrowserMainWindow::slotFileOpen()
+void BrowserWnd::slotFileOpen()
 {
     QString file = QFileDialog::getOpenFileName(this, tr("Open Web Resource"), QString(),
             tr("Web Resources (*.html *.htm *.svg *.png *.gif *.svgz);;All files (*.*)"));
@@ -700,7 +700,7 @@ void BrowserMainWindow::slotFileOpen()
     loadPage(file);
 }
 
-void BrowserMainWindow::slotFilePrintPreview()
+void BrowserWnd::slotFilePrintPreview()
 {
 #ifndef QT_NO_PRINTPREVIEWDIALOG
     if (!currentTab())
@@ -712,7 +712,7 @@ void BrowserMainWindow::slotFilePrintPreview()
 #endif
 }
 
-void BrowserMainWindow::slotFilePrint()
+void BrowserWnd::slotFilePrint()
 {
 #ifndef QT_NO_PRINTER
     if (!currentTab())
@@ -721,7 +721,7 @@ void BrowserMainWindow::slotFilePrint()
 #endif
 }
 
-void BrowserMainWindow::slotHandlePdfPrinted(const QByteArray& result)
+void BrowserWnd::slotHandlePdfPrinted(const QByteArray& result)
 {
     if (!result.size())
         return;
@@ -736,7 +736,7 @@ void BrowserMainWindow::slotHandlePdfPrinted(const QByteArray& result)
     file.close();
 }
 
-void BrowserMainWindow::slotFilePrintToPDF()
+void BrowserWnd::slotFilePrintToPDF()
 {
     if (!currentTab() || !m_printerOutputFileName.isEmpty())
         return;
@@ -748,11 +748,11 @@ void BrowserMainWindow::slotFilePrintToPDF()
         return;
 
     m_printerOutputFileName = dialog->filePath();
-    currentTab()->page()->printToPdf(invoke(this, &BrowserMainWindow::slotHandlePdfPrinted), dialog->pageLayout());
+    currentTab()->page()->printToPdf(invoke(this, &BrowserWnd::slotHandlePdfPrinted), dialog->pageLayout());
 }
 
 #ifndef QT_NO_PRINTER
-void BrowserMainWindow::slotHandlePagePrinted(bool result)
+void BrowserWnd::slotHandlePagePrinted(bool result)
 {
     Q_UNUSED(result);
 
@@ -761,7 +761,7 @@ void BrowserMainWindow::slotHandlePagePrinted(bool result)
 }
 
 
-void BrowserMainWindow::printRequested(QWebEnginePage *page)
+void BrowserWnd::printRequested(QWebEnginePage *page)
 {
 #ifndef QT_NO_PRINTDIALOG
     if (m_currentPrinter)
@@ -773,14 +773,14 @@ void BrowserMainWindow::printRequested(QWebEnginePage *page)
         slotHandlePagePrinted(false);
         return;
     }
-    page->print(m_currentPrinter, invoke(this, &BrowserMainWindow::slotHandlePagePrinted));
+    page->print(m_currentPrinter, invoke(this, &BrowserWnd::slotHandlePagePrinted));
 #endif
 }
 #endif
 
-void BrowserMainWindow::slotPrivateBrowsing()
+void BrowserWnd::slotPrivateBrowsing()
 {
-    if (!BrowserAppCtx::instance()->privateBrowsing()) {
+    if (!BrowserService::instance()->privateBrowsing()) {
         QString title = tr("Are you sure you want to turn on private browsing?");
         QString text = tr("<b>%1</b><br><br>"
             "This action will reload all open tabs.<br>"
@@ -798,14 +798,14 @@ void BrowserMainWindow::slotPrivateBrowsing()
                                QMessageBox::Ok);
 
         if (button == QMessageBox::Ok)
-            BrowserAppCtx::instance()->setPrivateBrowsing(true);
+            BrowserService::instance()->setPrivateBrowsing(true);
     } else {
         // TODO: Also ask here
-        BrowserAppCtx::instance()->setPrivateBrowsing(false);
+        BrowserService::instance()->setPrivateBrowsing(false);
     }
 }
 
-void BrowserMainWindow::closeEvent(QCloseEvent *event)
+void BrowserWnd::closeEvent(QCloseEvent *event)
 {
     if (m_tabWidget->count() > 1) {
         int ret = QMessageBox::warning(this, QString(),
@@ -822,7 +822,7 @@ void BrowserMainWindow::closeEvent(QCloseEvent *event)
     deleteLater();
 }
 
-void BrowserMainWindow::slotEditFind()
+void BrowserWnd::slotEditFind()
 {
     if (!currentTab())
         return;
@@ -832,46 +832,46 @@ void BrowserMainWindow::slotEditFind()
                                           m_lastSearch, &ok);
     if (ok && !search.isEmpty()) {
         m_lastSearch = search;
-        currentTab()->findText(m_lastSearch, 0, invoke(this, &BrowserMainWindow::handleFindTextResult));
+        currentTab()->findText(m_lastSearch, 0, invoke(this, &BrowserWnd::handleFindTextResult));
     }
 }
 
-void BrowserMainWindow::slotEditFindNext()
+void BrowserWnd::slotEditFindNext()
 {
     if (!currentTab() && !m_lastSearch.isEmpty())
         return;
     currentTab()->findText(m_lastSearch);
 }
 
-void BrowserMainWindow::slotEditFindPrevious()
+void BrowserWnd::slotEditFindPrevious()
 {
     if (!currentTab() && !m_lastSearch.isEmpty())
         return;
     currentTab()->findText(m_lastSearch, QWebEnginePage::FindBackward);
 }
 
-void BrowserMainWindow::slotViewZoomIn()
+void BrowserWnd::slotViewZoomIn()
 {
     if (!currentTab())
         return;
     currentTab()->setZoomFactor(currentTab()->zoomFactor() + 0.1);
 }
 
-void BrowserMainWindow::slotViewZoomOut()
+void BrowserWnd::slotViewZoomOut()
 {
     if (!currentTab())
         return;
     currentTab()->setZoomFactor(currentTab()->zoomFactor() - 0.1);
 }
 
-void BrowserMainWindow::slotViewResetZoom()
+void BrowserWnd::slotViewResetZoom()
 {
     if (!currentTab())
         return;
     currentTab()->setZoomFactor(1.0);
 }
 
-void BrowserMainWindow::slotViewFullScreen(bool makeFullScreen)
+void BrowserWnd::slotViewFullScreen(bool makeFullScreen)
 {
     if (makeFullScreen) {
         showFullScreen();
@@ -884,7 +884,7 @@ void BrowserMainWindow::slotViewFullScreen(bool makeFullScreen)
     }
 }
 
-void BrowserMainWindow::slotHome()
+void BrowserWnd::slotHome()
 {
     QSettings settings;
     settings.beginGroup(QLatin1String("MainWindow"));
@@ -892,13 +892,13 @@ void BrowserMainWindow::slotHome()
     loadPage(home);
 }
 
-void BrowserMainWindow::slotWebSearch()
+void BrowserWnd::slotWebSearch()
 {
     m_toolbarSearch->lineEdit()->selectAll();
     m_toolbarSearch->lineEdit()->setFocus();
 }
 
-void BrowserMainWindow::slotToggleInspector(bool enable)
+void BrowserWnd::slotToggleInspector(bool enable)
 {
 #if defined(QWEBENGINEINSPECTOR)
     QWebEngineSettings::globalSettings()->setAttribute(QWebEngineSettings::DeveloperExtrasEnabled, enable);
@@ -916,7 +916,7 @@ void BrowserMainWindow::slotToggleInspector(bool enable)
 #endif
 }
 
-void BrowserMainWindow::slotSwapFocus()
+void BrowserWnd::slotSwapFocus()
 {
     if (currentTab()->hasFocus())
         m_tabWidget->currentLineEdit()->setFocus();
@@ -924,23 +924,23 @@ void BrowserMainWindow::slotSwapFocus()
         currentTab()->setFocus();
 }
 
-void BrowserMainWindow::loadPage(const QString &page)
+void BrowserWnd::loadPage(const QString &page)
 {
     QUrl url = QUrl::fromUserInput(page);
     loadUrl(url);
 }
 
-TabWidget *BrowserMainWindow::tabWidget() const
+TabWidget *BrowserWnd::tabWidget() const
 {
     return m_tabWidget;
 }
 
-WebView *BrowserMainWindow::currentTab() const
+WebView *BrowserWnd::currentTab() const
 {
     return m_tabWidget->currentWebView();
 }
 
-void BrowserMainWindow::slotLoadProgress(int progress)
+void BrowserWnd::slotLoadProgress(int progress)
 {
     if (progress < 100 && progress > 0) {
         m_chaseWidget->setAnimated(true);
@@ -959,7 +959,7 @@ void BrowserMainWindow::slotLoadProgress(int progress)
     }
 }
 
-void BrowserMainWindow::slotAboutToShowBackMenu()
+void BrowserWnd::slotAboutToShowBackMenu()
 {
     m_historyBackMenu->clear();
     if (!currentTab())
@@ -970,14 +970,14 @@ void BrowserMainWindow::slotAboutToShowBackMenu()
         QWebEngineHistoryItem item = history->backItems(history->count()).at(i);
         QAction *action = new QAction(this);
         action->setData(-1*(historyCount-i-1));
-        QIcon icon = BrowserAppCtx::instance()->icon(item.url());
+        QIcon icon = BrowserService::instance()->icon(item.url());
         action->setIcon(icon);
         action->setText(item.title());
         m_historyBackMenu->addAction(action);
     }
 }
 
-void BrowserMainWindow::slotAboutToShowForwardMenu()
+void BrowserWnd::slotAboutToShowForwardMenu()
 {
     m_historyForwardMenu->clear();
     if (!currentTab())
@@ -988,14 +988,14 @@ void BrowserMainWindow::slotAboutToShowForwardMenu()
         QWebEngineHistoryItem item = history->forwardItems(historyCount).at(i);
         QAction *action = new QAction(this);
         action->setData(historyCount-i);
-        QIcon icon = BrowserAppCtx::instance()->icon(item.url());
+        QIcon icon = BrowserService::instance()->icon(item.url());
         action->setIcon(icon);
         action->setText(item.title());
         m_historyForwardMenu->addAction(action);
     }
 }
 
-void BrowserMainWindow::slotAboutToShowWindowMenu()
+void BrowserWnd::slotAboutToShowWindowMenu()
 {
     m_windowMenu->clear();
     m_windowMenu->addAction(m_tabWidget->nextTabAction());
@@ -1004,9 +1004,9 @@ void BrowserMainWindow::slotAboutToShowWindowMenu()
     m_windowMenu->addAction(tr("Downloads"), this, SLOT(slotDownloadManager()), QKeySequence(tr("Alt+Ctrl+L", "Download Manager")));
     m_windowMenu->addSeparator();
 
-    QList<BrowserMainWindow*> windows = BrowserAppCtx::instance()->mainWindows();
+    QList<BrowserWnd*> windows = BrowserService::instance()->browsers();
     for (int i = 0; i < windows.count(); ++i) {
-        BrowserMainWindow *window = windows.at(i);
+        BrowserWnd *window = windows.at(i);
         QAction *action = m_windowMenu->addAction(window->windowTitle(), this, SLOT(slotShowWindow()));
         action->setData(i);
         action->setCheckable(true);
@@ -1015,20 +1015,20 @@ void BrowserMainWindow::slotAboutToShowWindowMenu()
     }
 }
 
-void BrowserMainWindow::slotShowWindow()
+void BrowserWnd::slotShowWindow()
 {
     if (QAction *action = qobject_cast<QAction*>(sender())) {
         QVariant v = action->data();
         if (v.canConvert<int>()) {
             int offset = qvariant_cast<int>(v);
-            QList<BrowserMainWindow*> windows = BrowserAppCtx::instance()->mainWindows();
+            QList<BrowserWnd*> windows = BrowserService::instance()->browsers();
             windows.at(offset)->activateWindow();
             windows.at(offset)->currentTab()->setFocus();
         }
     }
 }
 
-void BrowserMainWindow::slotOpenActionUrl(QAction *action)
+void BrowserWnd::slotOpenActionUrl(QAction *action)
 {
     int offset = action->data().toInt();
     QWebEngineHistory *history = currentTab()->history();
@@ -1038,7 +1038,7 @@ void BrowserMainWindow::slotOpenActionUrl(QAction *action)
         history->goToItem(history->forwardItems(history->count() - offset + 1).back()); // forward
 }
 
-void BrowserMainWindow::geometryChangeRequested(const QRect &geometry)
+void BrowserWnd::geometryChangeRequested(const QRect &geometry)
 {
     setGeometry(geometry);
 }

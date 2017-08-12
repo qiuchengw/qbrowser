@@ -13,8 +13,13 @@
 # define BROWSER_EXPORT
 #endif
 
+typedef void* BROWSER_HANDLE;
+
 extern "C" 
 {
+    BROWSER_EXPORT bool initBrowserSevice();
 
+    // 创建一个新的窗口
+    BROWSER_EXPORT BROWSER_HANDLE createBrowser();
     
 }

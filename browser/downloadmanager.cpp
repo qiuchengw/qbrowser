@@ -52,7 +52,7 @@
 #include "downloadmanager.h"
 
 #include "autosaver.h"
-#include "browserapplication.h"
+#include "browserservice.h"
 
 #include <math.h>
 
@@ -350,7 +350,7 @@ void DownloadManager::updateRow()
 
     bool remove = false;
     if (!widget->downloading()
-        && BrowserAppCtx::instance()->privateBrowsing())
+        && BrowserService::instance()->privateBrowsing())
         remove = true;
 
     if (widget->downloadedSuccessfully()

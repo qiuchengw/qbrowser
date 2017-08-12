@@ -1,42 +1,14 @@
 #include "stdafx.h"
-#include "browserapplication.h"
+#include "browserservice.h"
 #include "bookmarks.h"
-#include "browsermainwindow.h"
+#include "browserwnd.h"
 #include "cookiejar.h"
 #include "downloadmanager.h"
 #include "history.h"
 #include "tabwidget.h"
 #include "webview.h"
 
-#include <QtCore/QBuffer>
-#include <QtCore/QDir>
-#include <QtCore/QLibraryInfo>
-#include <QtCore/QSettings>
-#include <QtCore/QTextStream>
-#include <QtCore/QTranslator>
-
-#include <QtGui/QDesktopServices>
-#include <QtGui/QFileOpenEvent>
-#include <QtWidgets/QMessageBox>
-
-#include <QtNetwork/QLocalServer>
-#include <QtNetwork/QLocalSocket>
-#include <QtNetwork/QNetworkProxy>
-#include <QtNetwork/QSslSocket>
-
-#include <QWebEngineProfile>
-#include <QWebEngineSettings>
-#include <QWebEngineScript>
-#include <QWebEngineScriptCollection>
-
-#include <QtCore/QDebug>
-
-DownloadManager *BrowserAppCtx::s_downloadManager = 0;
-HistoryManager *BrowserAppCtx::s_historyManager = 0;
-QNetworkAccessManager *BrowserAppCtx::s_networkAccessManager = 0;
-BookmarksManager *BrowserAppCtx::s_bookmarksManager = 0;
-
-static void setUserStyleSheet(QWebEngineProfile *profile, const QString &styleSheet, BrowserMainWindow *wnd = 0)
+static void setUserStyleSheet(QWebEngineProfile *profile, const QString &styleSheet, BrowserWnd *wnd = 0)
 {
     Q_ASSERT(profile);
     QString scriptName(QStringLiteral("userStyleSheet"));
@@ -44,7 +16,7 @@ static void setUserStyleSheet(QWebEngineProfile *profile, const QString &styleSh
     QList<QWebEngineScript> styleSheets = profile->scripts()->findScripts(scriptName);
     if (!styleSheets.isEmpty())
         script = styleSheets.first();
-    Q_FOREACH (const QWebEngineScript &s, styleSheets)
+    Q_FOREACH(const QWebEngineScript &s, styleSheets)
         profile->scripts()->remove(s);
 
     if (script.isNull()) {
@@ -54,15 +26,15 @@ static void setUserStyleSheet(QWebEngineProfile *profile, const QString &styleSh
         script.setWorldId(QWebEngineScript::ApplicationWorld);
     }
     QString source = QString::fromLatin1("(function() {"\
-                                         "var css = document.getElementById(\"_qt_testBrowser_userStyleSheet\");"\
-                                         "if (css == undefined) {"\
-                                         "    css = document.createElement(\"style\");"\
-                                         "    css.type = \"text/css\";"\
-                                         "    css.id = \"_qt_testBrowser_userStyleSheet\";"\
-                                         "    document.head.appendChild(css);"\
-                                         "}"\
-                                         "css.innerText = \"%1\";"\
-                                         "})()").arg(styleSheet);
+        "var css = document.getElementById(\"_qt_testBrowser_userStyleSheet\");"\
+        "if (css == undefined) {"\
+        "    css = document.createElement(\"style\");"\
+        "    css.type = \"text/css\";"\
+        "    css.id = \"_qt_testBrowser_userStyleSheet\";"\
+        "    document.head.appendChild(css);"\
+        "}"\
+        "css.innerText = \"%1\";"\
+        "})()").arg(styleSheet);
     script.setSourceCode(source);
     profile->scripts()->insert(script);
     // run the script on the already loaded views
@@ -71,109 +43,45 @@ static void setUserStyleSheet(QWebEngineProfile *profile, const QString &styleSh
         QMetaObject::invokeMethod(wnd, "runScriptOnOpenViews", Qt::QueuedConnection, Q_ARG(QString, source));
 }
 
-BrowserAppCtx::BrowserAppCtx(int &argc, char **argv)
-    : m_privateProfile(0)
+BrowserService::BrowserService()
+    : SingletonWithBase<BrowserService, QObject>(nullptr)
+    , m_privateProfile(0)
     , m_privateBrowsing(false)
 {
-    QCoreApplication::setOrganizationName(QLatin1String("Qt"));
-    QCoreApplication::setApplicationName(QLatin1String("demobrowser"));
-    QCoreApplication::setApplicationVersion(QLatin1String("0.1"));
-    QString serverName = QCoreApplication::applicationName()
-        + QString::fromLatin1(QT_VERSION_STR).remove('.') + QLatin1String("webengine");
-    QLocalSocket socket;
-    socket.connectToServer(serverName);
-    if (socket.waitForConnected(500)) {
-        QTextStream stream(&socket);
-        stream << getCommandLineUrlArgument();
-        stream.flush();
-        socket.waitForBytesWritten();
-        return;
-    }
-
-#if defined(Q_OS_OSX)
-    QApplication::setQuitOnLastWindowClosed(false);
-#else
-    QApplication::setQuitOnLastWindowClosed(true);
-#endif
-
-#ifndef QT_NO_OPENSSL
-    if (!QSslSocket::supportsSsl()) {
-    QMessageBox::information(0, "Demo Browser",
-                 "This system does not support OpenSSL. SSL websites will not be available.");
-    }
-#endif
-
-    QDesktopServices::setUrlHandler(QLatin1String("http"), this, "openUrl");
     QString localSysName = QLocale::system().name();
-
     installTranslator(QLatin1String("qt_") + localSysName);
 
     QSettings settings;
     settings.beginGroup(QLatin1String("sessions"));
     m_lastSession = settings.value(QLatin1String("lastSession")).toByteArray();
     settings.endGroup();
-
-#if defined(Q_OS_OSX)
-    connect(this, SIGNAL(lastWindowClosed()),
-            this, SLOT(lastWindowClosed()));
-#endif
-
-    QTimer::singleShot(0, this, SLOT(postLaunch()));
 }
 
-BrowserAppCtx::~BrowserAppCtx()
+BrowserService::~BrowserService()
 {
     delete s_downloadManager;
     for (int i = 0; i < m_mainWindows.size(); ++i) {
-        BrowserMainWindow *window = m_mainWindows.at(i);
+        BrowserWnd *window = m_mainWindows.at(i);
         delete window;
     }
     delete s_networkAccessManager;
     delete s_bookmarksManager;
 }
 
-void BrowserAppCtx::lastWindowClosed()
+void BrowserService::lastWindowClosed()
 {
 #if defined(Q_OS_OSX)
     clean();
-    BrowserMainWindow *mw = new BrowserMainWindow;
+    BrowserWnd *mw = new BrowserWnd;
     mw->slotHome();
     m_mainWindows.prepend(mw);
-#endif
-}
-
-BrowserAppCtx *BrowserAppCtx::instance()
-{
-    return (static_cast<BrowserAppCtx *>(QCoreApplication::instance()));
-}
-
-void BrowserAppCtx::quitBrowser()
-{
-#if defined(Q_OS_OSX)
-    clean();
-    int tabCount = 0;
-    for (int i = 0; i < m_mainWindows.count(); ++i) {
-        tabCount += m_mainWindows.at(i)->tabWidget()->count();
-    }
-
-    if (tabCount > 1) {
-        int ret = QMessageBox::warning(mainWindow(), QString(),
-                           tr("There are %1 windows and %2 tabs open\n"
-                              "Do you want to quit anyway?").arg(m_mainWindows.count()).arg(tabCount),
-                           QMessageBox::Yes | QMessageBox::No,
-                           QMessageBox::No);
-        if (ret == QMessageBox::No)
-            return;
-    }
-
-    exit(0);
 #endif
 }
 
 /*!
     Any actions that can be delayed until the window is visible
  */
-void BrowserAppCtx::postLaunch()
+void BrowserService::postLaunch()
 {
     QString directory = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     if (directory.isEmpty())
@@ -183,24 +91,12 @@ void BrowserAppCtx::postLaunch()
     QWebEngineSettings::setOfflineStoragePath(directory);
 #endif
 
-    setWindowIcon(QIcon(QLatin1String(":demobrowser.svg")));
-
     loadSettings();
 
-    // newMainWindow() needs to be called in main() for this to happen
-    if (m_mainWindows.count() > 0) {
-        const QString url = getCommandLineUrlArgument();
-        if (!url.isEmpty()) {
-            mainWindow()->loadPage(url);
-        } else {
-            mainWindow()->slotHome();
-        }
-
-    }
-    BrowserAppCtx::historyManager();
+    BrowserService::historyManager();
 }
 
-void BrowserAppCtx::loadSettings()
+void BrowserService::loadSettings()
 {
     QSettings settings;
     settings.beginGroup(QLatin1String("websettings"));
@@ -230,7 +126,7 @@ void BrowserAppCtx::loadSettings()
     defaultSettings->setAttribute(QWebEngineSettings::FullScreenSupportEnabled, true);
 
     QString css = settings.value(QLatin1String("userStyleSheet")).toString();
-    setUserStyleSheet(defaultProfile, css, mainWindow());
+    setUserStyleSheet(defaultProfile, css, browser());
 
     defaultProfile->setHttpUserAgent(settings.value(QLatin1String("httpUserAgent")).toString());
     defaultProfile->setHttpAcceptLanguage(settings.value(QLatin1String("httpAcceptLanguage")).toString());
@@ -275,16 +171,16 @@ void BrowserAppCtx::loadSettings()
     settings.endGroup();
 }
 
-QList<BrowserMainWindow*> BrowserAppCtx::mainWindows()
+QList<BrowserWnd*> BrowserService::browsers()
 {
     clean();
-    QList<BrowserMainWindow*> list;
+    QList<BrowserWnd*> list;
     for (int i = 0; i < m_mainWindows.count(); ++i)
         list.append(m_mainWindows.at(i));
     return list;
 }
 
-void BrowserAppCtx::clean()
+void BrowserService::clean()
 {
     // cleanup any deleted main windows first
     for (int i = m_mainWindows.count() - 1; i >= 0; --i)
@@ -292,7 +188,7 @@ void BrowserAppCtx::clean()
             m_mainWindows.removeAt(i);
 }
 
-void BrowserAppCtx::saveSession()
+void BrowserService::saveSession()
 {
     if (m_privateBrowsing)
         return;
@@ -314,12 +210,12 @@ void BrowserAppCtx::saveSession()
     settings.endGroup();
 }
 
-bool BrowserAppCtx::canRestoreSession() const
+bool BrowserService::canRestoreSession() const
 {
     return !m_lastSession.isEmpty();
 }
 
-void BrowserAppCtx::restoreLastSession()
+void BrowserService::restoreLastSession()
 {
     QList<QByteArray> windows;
     QBuffer buffer(&m_lastSession);
@@ -333,60 +229,43 @@ void BrowserAppCtx::restoreLastSession()
         windows.append(windowState);
     }
     for (int i = 0; i < windows.count(); ++i) {
-        BrowserMainWindow *newWindow = 0;
+        BrowserWnd *newWindow = 0;
         if (m_mainWindows.count() == 1
-            && mainWindow()->tabWidget()->count() == 1
-            && mainWindow()->currentTab()->url() == QUrl()) {
-            newWindow = mainWindow();
-        } else {
-            newWindow = newMainWindow();
+            && browser()->tabWidget()->count() == 1
+            && browser()->currentTab()->url() == QUrl()) {
+            newWindow = browser();
+        }
+        else {
+            newWindow = newBroswer();
         }
         newWindow->restoreState(windows.at(i));
     }
 }
 
-bool BrowserAppCtx::isTheOnlyBrowser() const
-{
-    return (m_localServer != 0);
-}
-
-void BrowserAppCtx::installTranslator(const QString &name)
+void BrowserService::installTranslator(const QString &name)
 {
     QTranslator *translator = new QTranslator(this);
     translator->load(name, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
     QApplication::installTranslator(translator);
 }
 
-QString BrowserAppCtx::getCommandLineUrlArgument() const
-{
-    const QStringList args = QCoreApplication::arguments();
-    if (args.count() > 1) {
-        const QString lastArg = args.last();
-        const bool isValidUrl = QUrl::fromUserInput(lastArg).isValid();
-        if (isValidUrl)
-            return lastArg;
-    }
-
-     return QString();
-}
-
 #if defined(Q_OS_OSX)
-bool BrowserAppCtx::event(QEvent* event)
+bool BrowserService::event(QEvent* event)
 {
     switch (event->type()) {
     case QEvent::ApplicationActivate: {
         clean();
         if (!m_mainWindows.isEmpty()) {
-            BrowserMainWindow *mw = mainWindow();
+            BrowserWnd *mw = browser();
             if (mw && !mw->isMinimized()) {
-                mainWindow()->show();
+                browser()->show();
             }
             return true;
         }
     }
     case QEvent::FileOpen:
         if (!m_mainWindows.isEmpty()) {
-            mainWindow()->loadPage(static_cast<QFileOpenEvent *>(event)->file());
+            browser()->loadPage(static_cast<QFileOpenEvent *>(event)->file());
             return true;
         }
     default:
@@ -396,28 +275,29 @@ bool BrowserAppCtx::event(QEvent* event)
 }
 #endif
 
-void BrowserAppCtx::openUrl(const QUrl &url)
+void BrowserService::openUrl(const QUrl &url)
 {
-    mainWindow()->loadPage(url.toString());
+    browser()->loadPage(url.toString());
 }
 
-BrowserMainWindow *BrowserAppCtx::newMainWindow()
+BrowserWnd *BrowserService::newBroswer()
 {
-    BrowserMainWindow *browser = new BrowserMainWindow();
+    BrowserWnd *browser = new BrowserWnd();
     m_mainWindows.prepend(browser);
     browser->show();
     return browser;
 }
 
-BrowserMainWindow *BrowserAppCtx::mainWindow()
+BrowserWnd *BrowserService::browser()
 {
     clean();
     if (m_mainWindows.isEmpty())
-        newMainWindow();
+        newBroswer();
+
     return m_mainWindows[0];
 }
 
-CookieJar *BrowserAppCtx::cookieJar()
+CookieJar *BrowserService::cookieJar()
 {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
     return (CookieJar*)networkAccessManager()->cookieJar();
@@ -426,7 +306,7 @@ CookieJar *BrowserAppCtx::cookieJar()
 #endif
 }
 
-DownloadManager *BrowserAppCtx::downloadManager()
+DownloadManager *BrowserService::downloadManager()
 {
     if (!s_downloadManager) {
         s_downloadManager = new DownloadManager();
@@ -434,7 +314,7 @@ DownloadManager *BrowserAppCtx::downloadManager()
     return s_downloadManager;
 }
 
-QNetworkAccessManager *BrowserAppCtx::networkAccessManager()
+QNetworkAccessManager *BrowserService::networkAccessManager()
 {
     if (!s_networkAccessManager) {
         s_networkAccessManager = new QNetworkAccessManager();
@@ -442,14 +322,14 @@ QNetworkAccessManager *BrowserAppCtx::networkAccessManager()
     return s_networkAccessManager;
 }
 
-HistoryManager *BrowserAppCtx::historyManager()
+HistoryManager *BrowserService::historyManager()
 {
     if (!s_historyManager)
         s_historyManager = new HistoryManager();
     return s_historyManager;
 }
 
-BookmarksManager *BrowserAppCtx::bookmarksManager()
+BookmarksManager *BrowserService::bookmarksManager()
 {
     if (!s_bookmarksManager) {
         s_bookmarksManager = new BookmarksManager;
@@ -457,7 +337,7 @@ BookmarksManager *BrowserAppCtx::bookmarksManager()
     return s_bookmarksManager;
 }
 
-QIcon BrowserAppCtx::icon(const QUrl &url) const
+QIcon BrowserService::icon(const QUrl &url) const
 {
 #if defined(QTWEBENGINE_ICONDATABASE)
     QIcon icon = QWebEngineSettings::iconForUrl(url);
@@ -469,14 +349,14 @@ QIcon BrowserAppCtx::icon(const QUrl &url) const
     return defaultIcon();
 }
 
-QIcon BrowserAppCtx::defaultIcon() const
+QIcon BrowserService::defaultIcon() const
 {
     if (m_defaultIcon.isNull())
         m_defaultIcon = QIcon(QLatin1String(":defaulticon.png"));
     return m_defaultIcon;
 }
 
-void BrowserAppCtx::setPrivateBrowsing(bool privateBrowsing)
+void BrowserService::setPrivateBrowsing(bool privateBrowsing)
 {
     if (m_privateBrowsing == privateBrowsing)
         return;
@@ -484,11 +364,12 @@ void BrowserAppCtx::setPrivateBrowsing(bool privateBrowsing)
     if (privateBrowsing) {
         if (!m_privateProfile)
             m_privateProfile = new QWebEngineProfile(this);
-        Q_FOREACH (BrowserMainWindow* window, mainWindows()) {
+        Q_FOREACH(BrowserWnd* window, browsers()) {
             window->tabWidget()->setProfile(m_privateProfile);
         }
-    } else {
-        Q_FOREACH (BrowserMainWindow* window, mainWindows()) {
+    }
+    else {
+        Q_FOREACH(BrowserWnd* window, browsers()) {
             window->tabWidget()->setProfile(QWebEngineProfile::defaultProfile());
             window->m_lastSearch = QString();
             window->tabWidget()->clear();

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "webpage.h"
-#include "browserapplication.h"
-#include "browsermainwindow.h"
+#include "browserservice.h"
+#include "browserwnd.h"
 #include "ui_passworddialog.h"
 #include "ui_proxy.h"
 #include "popupwindow.h"
@@ -14,7 +14,7 @@ WebPage::WebPage(QWebEngineProfile *profile, QObject *parent)
     , m_pressedButtons(Qt::NoButton)
 {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
-    setNetworkAccessManager(BrowserAppCtx::networkAccessManager());
+    setNetworkAccessManager(BrowserService::networkAccessManager());
 #endif
 #if defined(QWEBENGINEPAGE_UNSUPPORTEDCONTENT)
     connect(this, SIGNAL(unsupportedContent(QNetworkReply*)),
@@ -26,15 +26,15 @@ WebPage::WebPage(QWebEngineProfile *profile, QObject *parent)
         SLOT(proxyAuthenticationRequired(const QUrl &, QAuthenticator *, const QString &)));
 }
 
-BrowserMainWindow *WebPage::mainWindow()
+BrowserWnd *WebPage::mainWindow()
 {
     QObject *w = this->parent();
     while (w) {
-        if (BrowserMainWindow *mw = qobject_cast<BrowserMainWindow*>(w))
+        if (BrowserWnd *mw = qobject_cast<BrowserWnd*>(w))
             return mw;
         w = w->parent();
     }
-    return BrowserAppCtx::instance()->mainWindow();
+    return BrowserService::instance()->browser();
 }
 
 bool WebPage::certificateError(const QWebEngineCertificateError &error)
@@ -67,8 +67,8 @@ QWebEnginePage *WebPage::createWindow(QWebEnginePage::WebWindowType type)
         return mainWindow()->tabWidget()->newTab(false)->page();
     }
     else if (type == QWebEnginePage::WebBrowserWindow) {
-        BrowserAppCtx::instance()->newMainWindow();
-        BrowserMainWindow *mainWindow = BrowserAppCtx::instance()->mainWindow();
+        BrowserService::instance()->newBroswer();
+        BrowserWnd *mainWindow = BrowserService::instance()->browser();
         return mainWindow->currentTab()->page();
     }
     else {
@@ -146,7 +146,7 @@ void WebPage::handleUnsupportedContent(QNetworkReply *reply)
 
 void WebPage::authenticationRequired(const QUrl &requestUrl, QAuthenticator *auth)
 {
-    BrowserMainWindow *mainWindow = BrowserAppCtx::instance()->mainWindow();
+    BrowserWnd *mainWindow = BrowserService::instance()->browser();
 
     QDialog dialog(mainWindow);
     dialog.setWindowFlags(Qt::Sheet);
@@ -175,7 +175,7 @@ void WebPage::authenticationRequired(const QUrl &requestUrl, QAuthenticator *aut
 void WebPage::proxyAuthenticationRequired(const QUrl &requestUrl, QAuthenticator *auth, const QString &proxyHost)
 {
     Q_UNUSED(requestUrl);
-    BrowserMainWindow *mainWindow = BrowserAppCtx::instance()->mainWindow();
+    BrowserWnd *mainWindow = BrowserService::instance()->browser();
 
     QDialog dialog(mainWindow);
     dialog.setWindowFlags(Qt::Sheet);

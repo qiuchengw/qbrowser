@@ -50,7 +50,7 @@
 #include "stdafx.h"
 
 #include "edittreeview.h"
-#include "browserapplication.h"
+#include "browserservice.h"
 #include "history.h"
 
 EditTreeView::EditTreeView(QWidget *parent)
@@ -74,12 +74,12 @@ void EditTreeView::removeOne()
     if (!model())
         return;
     QModelIndex ci = currentIndex();
-    BrowserAppCtx::historyManager()->removeHistoryEntry(model()->data(ci,HistoryModel::UrlStringRole).toString());
+    BrowserService::historyManager()->removeHistoryEntry(model()->data(ci,HistoryModel::UrlStringRole).toString());
 }
 
 void EditTreeView::removeAll()
 {
     if (!model())
         return;
-    BrowserAppCtx::historyManager()->clear();
+    BrowserService::historyManager()->clear();
 }

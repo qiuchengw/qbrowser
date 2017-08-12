@@ -56,12 +56,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_bookmarks.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_browsermainwindow.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_browsermainwindow.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_chasewidget.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -188,12 +182,6 @@
     <ClCompile Include="bookmarks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="browserapplication.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="browsermainwindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="chasewidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -259,6 +247,24 @@
     </ClCompile>
     <ClCompile Include="browser.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="browserservice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_browserservice.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_browserservice.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="browserwnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_browserwnd.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_browserwnd.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -360,12 +366,6 @@
     <CustomBuild Include="bookmarks.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="browserapplication.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="browsermainwindow.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="chasewidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -424,6 +424,12 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="webview.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="browserservice.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="browserwnd.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

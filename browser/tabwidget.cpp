@@ -51,8 +51,8 @@
 #include "stdafx.h"
 #include "tabwidget.h"
 
-#include "browserapplication.h"
-#include "browsermainwindow.h"
+#include "browserservice.h"
+#include "browserwnd.h"
 #include "downloadmanager.h"
 #include "fullscreennotification.h"
 #include "history.h"
@@ -553,7 +553,7 @@ WebView *TabWidget::newTab(bool makeCurrent)
     QLineEdit *lineEdit = urlLineEdit->lineEdit();
     if (!m_lineEditCompleter && count() > 0) {
         HistoryCompletionModel *completionModel = new HistoryCompletionModel(this);
-        completionModel->setSourceModel(BrowserAppCtx::historyManager()->historyFilterModel());
+        completionModel->setSourceModel(BrowserService::historyManager()->historyFilterModel());
         m_lineEditCompleter = new QCompleter(completionModel, this);
         // Should this be in Qt by default?
         QAbstractItemView *popup = m_lineEditCompleter->popup();
@@ -744,7 +744,7 @@ void TabWidget::webViewTitleChanged(const QString &title)
     }
     if (currentIndex() == index)
         emit setCurrentTitle(title);
-    BrowserAppCtx::historyManager()->updateHistoryItem(webView->url(), title);
+    BrowserService::historyManager()->updateHistoryItem(webView->url(), title);
 }
 
 void TabWidget::webPageMutedOrAudibleChanged() {
@@ -770,7 +770,7 @@ void TabWidget::webViewUrlChanged(const QUrl &url)
     int index = webViewIndex(webView);
     if (-1 != index) {
         m_tabBar->setTabData(index, url);
-        HistoryManager *manager = BrowserAppCtx::historyManager();
+        HistoryManager *manager = BrowserService::historyManager();
         if (url.isValid())
             manager->addHistoryEntry(url.toString());
     }
@@ -783,7 +783,7 @@ void TabWidget::aboutToShowRecentTabsMenu()
     for (int i = 0; i < m_recentlyClosedTabs.count(); ++i) {
         QAction *action = new QAction(m_recentlyClosedTabsMenu);
         action->setData(m_recentlyClosedTabs.at(i));
-        QIcon icon = BrowserAppCtx::instance()->icon(m_recentlyClosedTabs.at(i));
+        QIcon icon = BrowserService::instance()->icon(m_recentlyClosedTabs.at(i));
         action->setIcon(icon);
         action->setText(m_recentlyClosedTabs.at(i).toString());
         m_recentlyClosedTabsMenu->addAction(action);
@@ -919,7 +919,7 @@ void TabWidget::downloadRequested(QWebEngineDownloadItem *download)
         download->setPath(dlg.filePath());
     }
 
-    BrowserAppCtx::downloadManager()->download(download);
+    BrowserService::downloadManager()->download(download);
     download->accept();
 }
 

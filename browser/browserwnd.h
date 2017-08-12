@@ -74,12 +74,12 @@ class WebView;
 
     Handles the tab widget and all the actions
  */
-class BrowserMainWindow : public QMainWindow {
+class BrowserWnd : public QMainWindow {
     Q_OBJECT
 
 public:
-    BrowserMainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
-    ~BrowserMainWindow();
+    BrowserWnd(QWidget *parent = 0, Qt::WindowFlags flags = 0);
+    ~BrowserWnd();
     QSize sizeHint() const;
 
     static const char *defaultHome;
@@ -189,7 +189,7 @@ private:
 
     QString m_lastSearch;
     QString m_printerOutputFileName;
-    friend class BrowserAppCtx;
+    friend class BrowserService;
 };
 
 #endif // BROWSERMAINWINDOW_H

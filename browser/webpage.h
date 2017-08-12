@@ -1,12 +1,12 @@
 #pragma once
 
 
-class BrowserMainWindow;
+class BrowserWnd;
 class WebPage : public QWebEnginePage {
     Q_OBJECT
 public:
     WebPage(QWebEngineProfile *profile, QObject *parent = 0);
-    BrowserMainWindow *mainWindow();
+    BrowserWnd *mainWindow();
 
 protected:
     QWebEnginePage *createWindow(QWebEnginePage::WebWindowType type) Q_DECL_OVERRIDE;

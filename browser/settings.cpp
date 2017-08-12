@@ -51,8 +51,8 @@
 #include "stdafx.h"
 #include "settings.h"
 
-#include "browserapplication.h"
-#include "browsermainwindow.h"
+#include "browserservice.h"
+#include "browserwnd.h"
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
 #include "cookiejar.h"
 #endif
@@ -124,7 +124,7 @@ void SettingsDialog::loadFromSettings()
 {
     QSettings settings;
     settings.beginGroup(QLatin1String("MainWindow"));
-    const QString defaultHome = QLatin1String(BrowserMainWindow::defaultHome);
+    const QString defaultHome = QLatin1String(BrowserWnd::defaultHome);
     homeLineEdit->setText(settings.value(QLatin1String("home"), defaultHome).toString());
     settings.endGroup();
 
@@ -252,11 +252,11 @@ void SettingsDialog::saveToSettings()
     settings.setValue(QLatin1String("password"), proxyPassword->text());
     settings.endGroup();
 
-    BrowserAppCtx::instance()->loadSettings();
+    BrowserService::instance()->loadSettings();
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
-    BrowserAppCtx::cookieJar()->loadSettings();
+    BrowserService::cookieJar()->loadSettings();
 #endif
-    BrowserAppCtx::historyManager()->loadSettings();
+    BrowserService::historyManager()->loadSettings();
 }
 
 void SettingsDialog::accept()
@@ -268,7 +268,7 @@ void SettingsDialog::accept()
 void SettingsDialog::showCookies()
 {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
-    CookiesDialog *dialog = new CookiesDialog(BrowserAppCtx::cookieJar(), this);
+    CookiesDialog *dialog = new CookiesDialog(BrowserService::cookieJar(), this);
     dialog->exec();
 #endif
 }
@@ -276,7 +276,7 @@ void SettingsDialog::showCookies()
 void SettingsDialog::showExceptions()
 {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
-    CookiesExceptionsDialog *dialog = new CookiesExceptionsDialog(BrowserAppCtx::cookieJar(), this);
+    CookiesExceptionsDialog *dialog = new CookiesExceptionsDialog(BrowserService::cookieJar(), this);
     dialog->exec();
 #endif
 }
@@ -321,7 +321,7 @@ void SettingsDialog::on_btn_sel_proxy__clicked()
 
 void SettingsDialog::setHomeToCurrentPage()
 {
-    BrowserMainWindow *mw = static_cast<BrowserMainWindow*>(parent());
+    BrowserWnd *mw = static_cast<BrowserWnd*>(parent());
     WebView *webView = mw->currentTab();
     if (webView)
         homeLineEdit->setText(webView->url().toString());
