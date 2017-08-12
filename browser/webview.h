@@ -11,7 +11,7 @@ QT_END_NAMESPACE
 
 
 class WebPage;
-class WebView : public QWebEngineView {
+class BROWSER_EXPORT WebView : public QWebEngineView {
     Q_OBJECT
 
 public:

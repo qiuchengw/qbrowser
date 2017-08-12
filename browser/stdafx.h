@@ -27,3 +27,4 @@
 #include <QWebEngineView>
 #include <QWebEngineContextMenuData>
 
+#include "browser.h"

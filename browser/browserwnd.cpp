@@ -572,13 +572,24 @@ void BrowserWnd::slotViewStatusbar()
     m_autoSaver->changeOccurred();
 }
 
-void BrowserWnd::loadUrl(const QUrl &url)
+WebView* BrowserWnd::loadUrl(const QUrl &url, bool new_tab, bool background)
 {
-    if (!currentTab() || !url.isValid())
-        return;
+    WebView* w = nullptr;
+    if (new_tab) {
+        w = newTab(!background);
+    }
+    else {
+        w = currentTab();
+        if (!w) {
+            w = newTab(true);
+        }
+    }
 
-    m_tabWidget->currentLineEdit()->setText(QString::fromUtf8(url.toEncoded()));
-    m_tabWidget->loadUrlInCurrentTab(url);
+    if (w) {
+        m_tabWidget->currentLineEdit()->setText(QString::fromUtf8(url.toEncoded()));
+        m_tabWidget->loadUrlInCurrentTab(url);
+    }
+    return w;
 }
 
 void BrowserWnd::slotDownloadManager()
@@ -878,12 +889,7 @@ void BrowserWnd::slotSwapFocus()
 void BrowserWnd::loadPage(const QString &page)
 {
     QUrl url = QUrl::fromUserInput(page);
-    loadUrl(url);
-}
-
-void BrowserWnd::loadPage(const QString &url, bool new_tab /*= false*/)
-{
-
+    loadUrl(url, true, false);
 }
 
 TabWidget *BrowserWnd::tabWidget() const
@@ -894,6 +900,11 @@ TabWidget *BrowserWnd::tabWidget() const
 WebView *BrowserWnd::currentTab() const
 {
     return m_tabWidget->currentWebView();
+}
+
+WebView* BrowserWnd::newTab(bool set_current)
+{
+    return m_tabWidget->newTab(set_current);
 }
 
 void BrowserWnd::slotLoadProgress(int progress)

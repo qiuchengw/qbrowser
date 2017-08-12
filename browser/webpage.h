@@ -2,7 +2,7 @@
 
 
 class BrowserWnd;
-class WebPage : public QWebEnginePage {
+class BROWSER_EXPORT WebPage : public QWebEnginePage {
     Q_OBJECT
 public:
     WebPage(QWebEngineProfile *profile, QObject *parent = 0);

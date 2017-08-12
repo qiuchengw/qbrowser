@@ -37,13 +37,15 @@ public:
 public:
     TabWidget *tabWidget() const;
     WebView *currentTab() const;
+    WebView* newTab(bool set_current = true);
+
     QByteArray saveState(bool withTabs = true) const;
     bool restoreState(const QByteArray &state);
     Q_INVOKABLE void runScriptOnOpenViews(const QString &);
-    void loadPage(const QString &url, bool new_tab = false);
 
 public slots:
-void loadPage(const QString &url);
+    void loadPage(const QString &url);
+    WebView* loadUrl(const QUrl &url, bool new_tab, bool background);
     void slotHome();
 
 protected:
@@ -56,7 +58,6 @@ private slots:
     void slotUpdateStatusbar(const QString &string);
     void slotUpdateWindowTitle(const QString &title = QString());
 
-    void loadUrl(const QUrl &url);
     void slotPreferences();
 
     void slotFileNew();
