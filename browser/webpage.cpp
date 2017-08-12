@@ -14,7 +14,7 @@ WebPage::WebPage(QWebEngineProfile *profile, QObject *parent)
     , m_pressedButtons(Qt::NoButton)
 {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
-    setNetworkAccessManager(BrowserService::networkAccessManager());
+    setNetworkAccessManager(BrowserService::networkAccessMan());
 #endif
 #if defined(QWEBENGINEPAGE_UNSUPPORTEDCONTENT)
     connect(this, SIGNAL(unsupportedContent(QNetworkReply*)),

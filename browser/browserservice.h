@@ -45,11 +45,11 @@ public:
     bool canRestoreSession() const;
     bool privateBrowsing() const { return m_privateBrowsing; }
 
-    static HistoryManager *historyManager();
+    static HistoryManager *historyMan();
     static CookieJar *cookieJar();
-    static DownloadManager *downloadManager();
-    static QNetworkAccessManager *networkAccessManager();
-    static BookmarksManager *bookmarksManager();
+    static DownloadManager *downloadMan();
+    static QNetworkAccessManager *networkAccessMan();
+    static BookmarksManager *bookmarksMan();
 
 #if defined(Q_OS_OSX)
     bool event(QEvent *event);

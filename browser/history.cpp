@@ -624,7 +624,7 @@ void HistoryMenu::activated(const QModelIndex &index)
 bool HistoryMenu::prePopulated()
 {
     if (!m_history) {
-        m_history = BrowserService::historyManager();
+        m_history = BrowserService::historyMan();
         m_historyMenuModel = new HistoryMenuModel(m_history->historyTreeModel(), this);
         setModel(m_historyMenuModel);
     }
@@ -682,7 +682,7 @@ HistoryDialog::HistoryDialog(QWidget *parent, HistoryManager *setHistory) : QDia
 {
     HistoryManager *history = setHistory;
     if (!history)
-        history = BrowserService::historyManager();
+        history = BrowserService::historyMan();
     setupUi(this);
     tree->setUniformRowHeights(true);
     tree->setSelectionBehavior(QAbstractItemView::SelectRows);

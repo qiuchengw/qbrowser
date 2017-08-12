@@ -21,5 +21,8 @@ extern "C"
 
     // 创建一个新的窗口
     BROWSER_EXPORT BROWSER_HANDLE createBrowser();
+
+    // cur_tab 是否复用当前的标签页
+    BROWSER_EXPORT bool openUrl(BROWSER_HANDLE h, const QString& url, bool new_tab);
     
 }

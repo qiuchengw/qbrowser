@@ -1,52 +1,3 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the demonstration applications of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
 #include "stdafx.h"
 #include "browserwnd.h"
 
@@ -99,7 +50,7 @@ InvokeWrapper<Arg, R, C> invoke(R *receiver, void (C::*memberFun)(Arg))
     return wrapper;
 }
 
-const char *BrowserWnd::defaultHome = "http://qt.io/";
+const char *BrowserWnd::defaultHome = "about:blank";
 
 BrowserWnd::BrowserWnd(QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
@@ -120,7 +71,7 @@ BrowserWnd::BrowserWnd(QWidget *parent, Qt::WindowFlags flags)
     setupToolBar();
 
     QWidget *centralWidget = new QWidget(this);
-    BookmarksModel *bookmarksModel = BrowserService::bookmarksManager()->bookmarksModel();
+    BookmarksModel *bookmarksModel = BrowserService::bookmarksMan()->bookmarksModel();
     m_bookmarksToolbar = new BookmarksToolBar(bookmarksModel, this);
     connect(m_bookmarksToolbar, SIGNAL(openUrl(QUrl)),
             m_tabWidget, SLOT(loadUrlInCurrentTab(QUrl)));
@@ -305,7 +256,7 @@ void BrowserWnd::setupMenu()
                 SLOT(slotFileSaveAs()), QKeySequence(QKeySequence::Save));
     fileMenu->addSeparator();
 #endif
-    BookmarksManager *bookmarksManager = BrowserService::bookmarksManager();
+    BookmarksManager *bookmarksManager = BrowserService::bookmarksMan();
     fileMenu->addAction(tr("&Import Bookmarks..."), bookmarksManager, SLOT(importBookmarks()));
     fileMenu->addAction(tr("&Export Bookmarks..."), bookmarksManager, SLOT(exportBookmarks()));
     fileMenu->addSeparator();
@@ -632,7 +583,7 @@ void BrowserWnd::loadUrl(const QUrl &url)
 
 void BrowserWnd::slotDownloadManager()
 {
-    BrowserService::downloadManager()->show();
+    BrowserService::downloadMan()->show();
 }
 
 void BrowserWnd::slotSelectLineEdit()
@@ -928,6 +879,11 @@ void BrowserWnd::loadPage(const QString &page)
 {
     QUrl url = QUrl::fromUserInput(page);
     loadUrl(url);
+}
+
+void BrowserWnd::loadPage(const QString &url, bool new_tab /*= false*/)
+{
+
 }
 
 TabWidget *BrowserWnd::tabWidget() const

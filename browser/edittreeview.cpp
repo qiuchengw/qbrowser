@@ -74,12 +74,12 @@ void EditTreeView::removeOne()
     if (!model())
         return;
     QModelIndex ci = currentIndex();
-    BrowserService::historyManager()->removeHistoryEntry(model()->data(ci,HistoryModel::UrlStringRole).toString());
+    BrowserService::historyMan()->removeHistoryEntry(model()->data(ci,HistoryModel::UrlStringRole).toString());
 }
 
 void EditTreeView::removeAll()
 {
     if (!model())
         return;
-    BrowserService::historyManager()->clear();
+    BrowserService::historyMan()->clear();
 }

@@ -93,7 +93,7 @@ void BrowserService::postLaunch()
 
     loadSettings();
 
-    BrowserService::historyManager();
+    BrowserService::historyMan();
 }
 
 void BrowserService::loadSettings()
@@ -300,41 +300,45 @@ BrowserWnd *BrowserService::browser()
 CookieJar *BrowserService::cookieJar()
 {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
-    return (CookieJar*)networkAccessManager()->cookieJar();
+    return (CookieJar*)networkAccessMan()->cookieJar();
 #else
     return 0;
 #endif
 }
 
-DownloadManager *BrowserService::downloadManager()
+DownloadManager *BrowserService::downloadMan()
 {
-    if (!s_downloadManager) {
-        s_downloadManager = new DownloadManager();
+    BrowserService* inst = BrowserService::instance();
+    if (!inst->s_downloadManager) {
+        inst->s_downloadManager = new DownloadManager();
     }
-    return s_downloadManager;
+    return inst->s_downloadManager;
 }
 
-QNetworkAccessManager *BrowserService::networkAccessManager()
+QNetworkAccessManager *BrowserService::networkAccessMan()
 {
-    if (!s_networkAccessManager) {
-        s_networkAccessManager = new QNetworkAccessManager();
+    BrowserService* inst = BrowserService::instance();
+    if (!inst->s_networkAccessManager) {
+        inst->s_networkAccessManager = new QNetworkAccessManager();
     }
-    return s_networkAccessManager;
+    return inst->s_networkAccessManager;
 }
 
-HistoryManager *BrowserService::historyManager()
+HistoryManager *BrowserService::historyMan()
 {
-    if (!s_historyManager)
-        s_historyManager = new HistoryManager();
-    return s_historyManager;
+    BrowserService* inst = BrowserService::instance();
+    if (!inst->s_historyManager)
+        inst->s_historyManager = new HistoryManager();
+    return inst->s_historyManager;
 }
 
-BookmarksManager *BrowserService::bookmarksManager()
+BookmarksManager *BrowserService::bookmarksMan()
 {
-    if (!s_bookmarksManager) {
-        s_bookmarksManager = new BookmarksManager;
+    BrowserService* inst = BrowserService::instance();
+    if (!inst->s_bookmarksManager) {
+        inst->s_bookmarksManager = new BookmarksManager;
     }
-    return s_bookmarksManager;
+    return inst->s_bookmarksManager;
 }
 
 QIcon BrowserService::icon(const QUrl &url) const

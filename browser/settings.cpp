@@ -256,7 +256,7 @@ void SettingsDialog::saveToSettings()
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
     BrowserService::cookieJar()->loadSettings();
 #endif
-    BrowserService::historyManager()->loadSettings();
+    BrowserService::historyMan()->loadSettings();
 }
 
 void SettingsDialog::accept()

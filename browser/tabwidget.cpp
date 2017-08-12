@@ -553,7 +553,7 @@ WebView *TabWidget::newTab(bool makeCurrent)
     QLineEdit *lineEdit = urlLineEdit->lineEdit();
     if (!m_lineEditCompleter && count() > 0) {
         HistoryCompletionModel *completionModel = new HistoryCompletionModel(this);
-        completionModel->setSourceModel(BrowserService::historyManager()->historyFilterModel());
+        completionModel->setSourceModel(BrowserService::historyMan()->historyFilterModel());
         m_lineEditCompleter = new QCompleter(completionModel, this);
         // Should this be in Qt by default?
         QAbstractItemView *popup = m_lineEditCompleter->popup();
@@ -744,7 +744,7 @@ void TabWidget::webViewTitleChanged(const QString &title)
     }
     if (currentIndex() == index)
         emit setCurrentTitle(title);
-    BrowserService::historyManager()->updateHistoryItem(webView->url(), title);
+    BrowserService::historyMan()->updateHistoryItem(webView->url(), title);
 }
 
 void TabWidget::webPageMutedOrAudibleChanged() {
@@ -770,7 +770,7 @@ void TabWidget::webViewUrlChanged(const QUrl &url)
     int index = webViewIndex(webView);
     if (-1 != index) {
         m_tabBar->setTabData(index, url);
-        HistoryManager *manager = BrowserService::historyManager();
+        HistoryManager *manager = BrowserService::historyMan();
         if (url.isValid())
             manager->addHistoryEntry(url.toString());
     }
@@ -919,7 +919,7 @@ void TabWidget::downloadRequested(QWebEngineDownloadItem *download)
         download->setPath(dlg.filePath());
     }
 
-    BrowserService::downloadManager()->download(download);
+    BrowserService::downloadMan()->download(download);
     download->accept();
 }
 
