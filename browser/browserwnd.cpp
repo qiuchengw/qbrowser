@@ -128,7 +128,10 @@ BrowserWnd::~BrowserWnd()
 
 void BrowserWnd::addFunctionPanel(BrowserFunctionPanel* panel)
 {
-    m_workerstack->addPanel(panel);
+    if (panel) {
+        m_workerstack->addPanel(panel);
+        panel->onTabActived(currentTab());
+    }
 }
 
 void BrowserWnd::loadDefaultState()
