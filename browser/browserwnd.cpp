@@ -131,6 +131,11 @@ void BrowserWnd::addFunctionPanel(BrowserFunctionPanel* panel)
     if (panel) {
         m_workerstack->addPanel(panel);
         panel->onTabActived(currentTab());
+
+		int min_width = panel->widget()->minimumWidth();
+		if (min_width > m_workerstack->minimumWidth()) {
+			m_workerstack->setMinimumWidth(min_width + 10);
+		}
     }
 }
 
