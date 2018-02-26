@@ -33,7 +33,9 @@ signals:
        void onOpenUrl(QString file, bool newtab);
 };
 
+class BrowserWnd;
 class BrowserFunctionPanel {
+	friend class BrowserWnd;
 public:
     BrowserFunctionPanel(const QString& name)
         :name_(name){
@@ -57,15 +59,22 @@ public:
     }
 
     virtual void onTabActived(WebView*) {
-
     }
+
+	// 当前活动的tab页面
+	WebView* currentWebView()const;
 
 //     virtual void onUrlChanged(WebView*, const QString& url) {
 // 
 //     }
+private:
+	void setBrowserWnd(BrowserWnd* wnd) {
+		wnd_ = wnd;
+	}
 
 protected:
-    QString name_;
+	BrowserWnd* wnd_ = nullptr;
+	QString name_;
 };
 
 extern "C" 

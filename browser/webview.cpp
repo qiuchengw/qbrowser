@@ -114,11 +114,13 @@ void WebView::setProgress(int progress)
 
 void WebView::loadFinished(bool success)
 {
-    if (success && 100 != m_progress) {
-        qWarning() << "Received finished signal while progress is still:" << progress()
-                   << "Url:" << url();
+    if (success){
+		if (100 != m_progress) {
+			qWarning() << "Received finished signal while progress is still:" << progress()
+				<< "Url:" << url();
+			m_progress = 0;
+		}
     }
-    m_progress = 0;
 }
 
 void WebView::loadUrl(const QUrl &url)

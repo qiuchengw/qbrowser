@@ -24,6 +24,12 @@ extern "C" {
     void addBrowserFunctionPanel(BROWSER_HANDLE h, BrowserFunctionPanel* panel){
         browser(h)->addFunctionPanel(panel);
     }
-
 }
 
+WebView* BrowserFunctionPanel::currentWebView() const
+{
+	if (wnd_) {
+		return wnd_->currentTab();
+	}
+	return nullptr;
+}

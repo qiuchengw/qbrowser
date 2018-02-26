@@ -24,6 +24,7 @@ public:
 
     QString lastStatusBarText() const;
     inline int progress() const { return m_progress; }
+	inline bool sucessFinished() const { return m_progress == 100; }
 
     void toHtml(std::function<void(const QString&)>);
 
