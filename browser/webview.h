@@ -36,7 +36,7 @@ protected:
 
 private slots:
     void setProgress(int progress);
-    void loadFinished(bool success);
+    void onLoadFinished(bool success);
     void setStatusBarText(const QString &string);
     void onFeaturePermissionRequested(const QUrl &securityOrigin, QWebEnginePage::Feature);
     void onIconChanged(const QIcon &icon);

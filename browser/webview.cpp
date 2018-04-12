@@ -18,7 +18,7 @@ WebView::WebView(QWidget* parent)
     connect(this, SIGNAL(loadProgress(int)),
             this, SLOT(setProgress(int)));
     connect(this, SIGNAL(loadFinished(bool)),
-            this, SLOT(loadFinished(bool)));
+            this, SLOT(onLoadFinished(bool)));
     connect(this, &QWebEngineView::renderProcessTerminated,
             [=](QWebEnginePage::RenderProcessTerminationStatus termStatus, int statusCode) {
         const char *status = "";
@@ -112,7 +112,7 @@ void WebView::setProgress(int progress)
     m_progress = progress;
 }
 
-void WebView::loadFinished(bool success)
+void WebView::onLoadFinished(bool success)
 {
     if (success){
 		if (100 != m_progress) {

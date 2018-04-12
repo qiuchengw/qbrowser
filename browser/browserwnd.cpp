@@ -129,6 +129,7 @@ BrowserWnd::~BrowserWnd()
 void BrowserWnd::addFunctionPanel(BrowserFunctionPanel* panel)
 {
     if (panel) {
+		panel->setBrowserWnd(this);
         m_workerstack->addPanel(panel);
         panel->onTabActived(currentTab());
 
@@ -782,6 +783,11 @@ void BrowserWnd::closeEvent(QCloseEvent *event)
             return;
         }
     }
+
+	if (onDestroy) {
+		onDestroy(this);
+	}
+
     event->accept();
     deleteLater();
 }

@@ -9,8 +9,12 @@ inline BrowserWnd* browser(BROWSER_HANDLE h) {
 
 extern "C" {
 
-    BROWSER_HANDLE createBrowser(){
-        return BrowserService::instance()->newBroswer();
+    BROWSER_HANDLE createBrowser(BROWSER_CLOSE_CB onDestroy){
+		if (BrowserWnd* w = BrowserService::instance()->newBroswer()) {
+			w->setDestoryNotify(onDestroy);
+			return w;
+		}
+		return nullptr;
     }
 
     bool initBrowserSevice(BrowserServiceContext* ctx){
@@ -26,8 +30,7 @@ extern "C" {
     }
 }
 
-WebView* BrowserFunctionPanel::currentWebView() const
-{
+WebView* BrowserFunctionPanel::webView() const{
 	if (wnd_) {
 		return wnd_->currentTab();
 	}

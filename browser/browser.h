@@ -17,6 +17,7 @@
 #include "webview.h"
 
 typedef void* BROWSER_HANDLE;
+typedef std::function<void(BROWSER_HANDLE)> BROWSER_CLOSE_CB;
 
 class BrowserServiceContext : public QObject
 {
@@ -62,7 +63,7 @@ public:
     }
 
 	// 当前活动的tab页面
-	WebView* currentWebView()const;
+	WebView* webView()const;
 
 //     virtual void onUrlChanged(WebView*, const QString& url) {
 // 
@@ -82,7 +83,8 @@ extern "C"
     BROWSER_EXPORT bool initBrowserSevice(BrowserServiceContext* ctx);
 
     // 创建一个新的窗口
-    BROWSER_EXPORT BROWSER_HANDLE createBrowser();
+	//	onDestroy 销毁窗口的通知
+	BROWSER_EXPORT BROWSER_HANDLE createBrowser(BROWSER_CLOSE_CB onDestroy);
 
     // new_tab 是否打开一个新的标签页
     // bkgnd 是否后台打开窗口

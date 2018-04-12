@@ -4,6 +4,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtGui/QIcon>
 #include <QtCore/QUrl>
+#include "browser.h"
 
 QT_BEGIN_NAMESPACE
 #ifndef QT_NO_PRINTER
@@ -32,6 +33,10 @@ public:
     static const char *DEFAULT_HOME;
 
     void addFunctionPanel(BrowserFunctionPanel* panel);
+
+	void setDestoryNotify(BROWSER_CLOSE_CB d) {
+		onDestroy = d;
+	}
 
 public:
     TabWidget *tabWidget() const;
@@ -143,7 +148,7 @@ private:
     QString m_printerOutputFileName;
     friend class BrowserService;
 
-
+	BROWSER_CLOSE_CB onDestroy;
 };
 
 #endif // BROWSERMAINWINDOW_H
