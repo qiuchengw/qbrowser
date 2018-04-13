@@ -34,8 +34,13 @@ public:
 
     void addFunctionPanel(BrowserFunctionPanel* panel);
 
-	void setDestoryNotify(BROWSER_CLOSE_CB d) {
-		onDestroy = d;
+	void setDestoryNotify(BrowserDestoryCallback d) {
+		m_onDestroy = d;
+	}
+
+	// 请求创建browser的
+	void setCreateBrowserDelegate(CreateBrowserDelegater d) {
+		m_createBrowser = d;
 	}
 
 public:
@@ -148,7 +153,8 @@ private:
     QString m_printerOutputFileName;
     friend class BrowserService;
 
-	BROWSER_CLOSE_CB onDestroy;
+	BrowserDestoryCallback m_onDestroy;
+	CreateBrowserDelegater m_createBrowser;
 };
 
 #endif // BROWSERMAINWINDOW_H

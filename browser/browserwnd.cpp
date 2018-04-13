@@ -649,9 +649,13 @@ void BrowserWnd::slotAboutApplication()
 
 void BrowserWnd::slotFileNew()
 {
-    BrowserService::instance()->newBroswer();
-    BrowserWnd *mw = BrowserService::instance()->browser();
-    mw->slotHome();
+	if (m_createBrowser) {
+		m_createBrowser(this);
+	}
+	else {
+		BrowserWnd *mw = BrowserService::instance()->browser();
+		mw->slotHome();
+	}
 }
 
 void BrowserWnd::slotFileOpen()
@@ -784,8 +788,8 @@ void BrowserWnd::closeEvent(QCloseEvent *event)
         }
     }
 
-	if (onDestroy) {
-		onDestroy(this);
+	if (m_onDestroy) {
+		m_onDestroy(this);
 	}
 
     event->accept();

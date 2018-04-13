@@ -9,9 +9,10 @@ inline BrowserWnd* browser(BROWSER_HANDLE h) {
 
 extern "C" {
 
-    BROWSER_HANDLE createBrowser(BROWSER_CLOSE_CB onDestroy){
+    BROWSER_HANDLE createBrowser(BrowserDestoryCallback onDestroy, CreateBrowserDelegater createNew){
 		if (BrowserWnd* w = BrowserService::instance()->newBroswer()) {
 			w->setDestoryNotify(onDestroy);
+			w->setCreateBrowserDelegate(createNew);
 			return w;
 		}
 		return nullptr;

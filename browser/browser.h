@@ -17,7 +17,8 @@
 #include "webview.h"
 
 typedef void* BROWSER_HANDLE;
-typedef std::function<void(BROWSER_HANDLE)> BROWSER_CLOSE_CB;
+typedef std::function<void(BROWSER_HANDLE)> BrowserDestoryCallback;
+typedef std::function<void(BROWSER_HANDLE)> CreateBrowserDelegater;
 
 class BrowserServiceContext : public QObject
 {
@@ -84,7 +85,7 @@ extern "C"
 
     // 创建一个新的窗口
 	//	onDestroy 销毁窗口的通知
-	BROWSER_EXPORT BROWSER_HANDLE createBrowser(BROWSER_CLOSE_CB onDestroy);
+	BROWSER_EXPORT BROWSER_HANDLE createBrowser(BrowserDestoryCallback onDestroy, CreateBrowserDelegater createNew);
 
     // new_tab 是否打开一个新的标签页
     // bkgnd 是否后台打开窗口
