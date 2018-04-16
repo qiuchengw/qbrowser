@@ -59,8 +59,7 @@ class QPaintEvent;
 class QTimerEvent;
 QT_END_NAMESPACE
 
-class ChaseWidget : public QWidget
-{
+class ChaseWidget : public QWidget {
     Q_OBJECT
 public:
     ChaseWidget(QWidget *parent = 0, QPixmap pixmap = QPixmap(), bool pixmapEnabled = false);

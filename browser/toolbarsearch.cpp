@@ -62,8 +62,7 @@ ToolbarSearch::ToolbarSearch(QWidget *parent)
     : SearchLineEdit(parent)
     , m_autosaver(new AutoSaver(this))
     , m_maxSavedSearches(10)
-    , m_stringListModel(new QStringListModel(this))
-{
+    , m_stringListModel(new QStringListModel(this)) {
     QMenu *m = menu();
     connect(m, SIGNAL(aboutToShow()), this, SLOT(aboutToShowMenu()));
     connect(m, SIGNAL(triggered(QAction*)), this, SLOT(triggeredMenuAction(QAction*)));
@@ -77,13 +76,11 @@ ToolbarSearch::ToolbarSearch(QWidget *parent)
     load();
 }
 
-ToolbarSearch::~ToolbarSearch()
-{
+ToolbarSearch::~ToolbarSearch() {
     m_autosaver->saveIfNeccessary();
 }
 
-void ToolbarSearch::save()
-{
+void ToolbarSearch::save() {
     QSettings settings;
     settings.beginGroup(QLatin1String("toolbarsearch"));
     settings.setValue(QLatin1String("recentSearches"), m_stringListModel->stringList());
@@ -91,8 +88,7 @@ void ToolbarSearch::save()
     settings.endGroup();
 }
 
-void ToolbarSearch::load()
-{
+void ToolbarSearch::load() {
     QSettings settings;
     settings.beginGroup(QLatin1String("toolbarsearch"));
     QStringList list = settings.value(QLatin1String("recentSearches")).toStringList();
@@ -101,8 +97,7 @@ void ToolbarSearch::load()
     settings.endGroup();
 }
 
-void ToolbarSearch::searchNow()
-{
+void ToolbarSearch::searchNow() {
     QString searchText = lineEdit()->text();
     QStringList newList = m_stringListModel->stringList();
     if (newList.contains(searchText))
@@ -127,8 +122,7 @@ void ToolbarSearch::searchNow()
     emit search(url);
 }
 
-void ToolbarSearch::aboutToShowMenu()
-{
+void ToolbarSearch::aboutToShowMenu() {
     lineEdit()->selectAll();
     QMenu *m = menu();
     m->clear();
@@ -148,8 +142,7 @@ void ToolbarSearch::aboutToShowMenu()
     m->addAction(tr("Clear Recent Searches"), this, SLOT(clear()));
 }
 
-void ToolbarSearch::triggeredMenuAction(QAction *action)
-{
+void ToolbarSearch::triggeredMenuAction(QAction *action) {
     QVariant v = action->data();
     if (v.canConvert<QString>()) {
         QString text = v.toString();
@@ -158,8 +151,7 @@ void ToolbarSearch::triggeredMenuAction(QAction *action)
     }
 }
 
-void ToolbarSearch::clear()
-{
+void ToolbarSearch::clear() {
     m_stringListModel->setStringList(QStringList());
     m_autosaver->changeOccurred();;
 }

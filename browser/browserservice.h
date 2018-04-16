@@ -25,11 +25,10 @@ class HistoryManager;
 #include "kutil/singleton.h"
 
 struct BrowserServiceContext;
-class BrowserService : public SingletonWithBase<BrowserService, QObject>
-{
+class BrowserService : public SingletonWithBase<BrowserService, QObject> {
     Q_OBJECT
 
-        friend class SingletonWithBase<BrowserService, QObject>;
+    friend class SingletonWithBase<BrowserService, QObject>;
 
     BrowserService();
     ~BrowserService();
@@ -41,7 +40,7 @@ public:
         ctx_ = ctx;
     }
 
-    BrowserServiceContext* context()const{
+    BrowserServiceContext* context()const {
         return ctx_;
     }
 
@@ -52,7 +51,9 @@ public:
 
     void saveSession();
     bool canRestoreSession() const;
-    bool privateBrowsing() const { return m_privateBrowsing; }
+    bool privateBrowsing() const {
+        return m_privateBrowsing;
+    }
 
     static HistoryManager *historyMan();
     static CookieJar *cookieJar();

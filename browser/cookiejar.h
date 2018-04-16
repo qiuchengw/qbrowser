@@ -58,8 +58,7 @@ QT_END_NAMESPACE
 
 class AutoSaver;
 
-class CookieJar : public QNetworkCookieJar
-{
+class CookieJar : public QNetworkCookieJar {
     friend class CookieModel;
     Q_OBJECT
     Q_PROPERTY(AcceptPolicy acceptPolicy READ acceptPolicy WRITE setAcceptPolicy)
@@ -127,8 +126,7 @@ private:
     QStringList m_exceptions_allowForSession;
 };
 
-class CookieModel : public QAbstractTableModel
-{
+class CookieModel : public QAbstractTableModel {
     Q_OBJECT
 
 public:
@@ -149,8 +147,7 @@ private:
 #include "ui_cookies.h"
 #include "ui_cookiesexceptions.h"
 
-class CookiesDialog : public QDialog, public Ui_CookiesDialog
-{
+class CookiesDialog : public QDialog, public Ui_CookiesDialog {
     Q_OBJECT
 
 public:
@@ -160,8 +157,7 @@ private:
     QSortFilterProxyModel *m_proxyModel;
 };
 
-class CookieExceptionsModel : public QAbstractTableModel
-{
+class CookieExceptionsModel : public QAbstractTableModel {
     Q_OBJECT
     friend class CookiesExceptionsDialog;
 
@@ -182,8 +178,7 @@ private:
     QStringList m_sessionCookies;
 };
 
-class CookiesExceptionsDialog : public QDialog, public Ui_CookiesExceptionsDialog
-{
+class CookiesExceptionsDialog : public QDialog, public Ui_CookiesExceptionsDialog {
     Q_OBJECT
 
 public:

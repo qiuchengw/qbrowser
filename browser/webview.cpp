@@ -13,21 +13,20 @@
 WebView::WebView(QWidget* parent)
     : QWebEngineView(parent)
     , m_progress(0)
-    , m_page(0)
-{
+    , m_page(0) {
     connect(this, SIGNAL(loadProgress(int)),
             this, SLOT(setProgress(int)));
     connect(this, SIGNAL(loadFinished(bool)),
             this, SLOT(onLoadFinished(bool)));
     connect(this, &QWebEngineView::renderProcessTerminated,
-            [=](QWebEnginePage::RenderProcessTerminationStatus termStatus, int statusCode) {
+    [=](QWebEnginePage::RenderProcessTerminationStatus termStatus, int statusCode) {
         const char *status = "";
         switch (termStatus) {
         case QWebEnginePage::NormalTerminationStatus:
             status = "(normal exit)";
             break;
         case QWebEnginePage::AbnormalTerminationStatus:
-            status = "(abnormal exit)"; 
+            status = "(abnormal exit)";
             break;
         case QWebEnginePage::CrashedTerminationStatus:
             status = "(crashed)";
@@ -42,8 +41,7 @@ WebView::WebView(QWidget* parent)
     });
 }
 
-void WebView::setPage(WebPage *_page)
-{
+void WebView::setPage(WebPage *_page) {
     if (m_page)
         m_page->deleteLater();
     m_page = _page;
@@ -61,8 +59,7 @@ void WebView::setPage(WebPage *_page)
 #endif
 }
 
-void WebView::contextMenuEvent(QContextMenuEvent *event)
-{
+void WebView::contextMenuEvent(QContextMenuEvent *event) {
     QMenu *menu;
     if (page()->contextMenuData().linkUrl().isValid()) {
         menu = new QMenu(this);
@@ -82,8 +79,7 @@ void WebView::contextMenuEvent(QContextMenuEvent *event)
     menu->popup(event->globalPos());
 }
 
-void WebView::wheelEvent(QWheelEvent *event)
-{
+void WebView::wheelEvent(QWheelEvent *event) {
 #if defined(QWEBENGINEPAGE_SETTEXTSIZEMULTIPLIER)
     if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
         int numDegrees = event->delta() / 8;
@@ -96,8 +92,7 @@ void WebView::wheelEvent(QWheelEvent *event)
     QWebEngineView::wheelEvent(event);
 }
 
-void WebView::onFeaturePermissionRequested(const QUrl &securityOrigin, QWebEnginePage::Feature feature)
-{
+void WebView::onFeaturePermissionRequested(const QUrl &securityOrigin, QWebEnginePage::Feature feature) {
     FeaturePermissionBar *permissionBar = new FeaturePermissionBar(this);
     connect(permissionBar, &FeaturePermissionBar::featurePermissionProvided, page(), &QWebEnginePage::setFeaturePermission);
 
@@ -107,40 +102,34 @@ void WebView::onFeaturePermissionRequested(const QUrl &securityOrigin, QWebEngin
     permissionBar->requestPermission(securityOrigin, feature);
 }
 
-void WebView::setProgress(int progress)
-{
+void WebView::setProgress(int progress) {
     m_progress = progress;
 }
 
-void WebView::onLoadFinished(bool success)
-{
-    if (success){
-		if (100 != m_progress) {
-			qWarning() << "Received finished signal while progress is still:" << progress()
-				<< "Url:" << url();
-			m_progress = 0;
-		}
+void WebView::onLoadFinished(bool success) {
+    if (success) {
+        if (100 != m_progress) {
+            qWarning() << "Received finished signal while progress is still:" << progress()
+                       << "Url:" << url();
+            m_progress = 0;
+        }
     }
 }
 
-void WebView::loadUrl(const QUrl &url)
-{
+void WebView::loadUrl(const QUrl &url) {
     m_initialUrl = url;
     load(url);
 }
 
-QString WebView::lastStatusBarText() const
-{
+QString WebView::lastStatusBarText() const {
     return m_statusBarText;
 }
 
-void WebView::toHtml(std::function<void(const QString&)> resultCB)
-{
+void WebView::toHtml(std::function<void(const QString&)> resultCB) {
     page()->toHtml(resultCB);
 }
 
-QUrl WebView::url() const
-{
+QUrl WebView::url() const {
     QUrl url = QWebEngineView::url();
     if (!url.isEmpty())
         return url;
@@ -148,23 +137,20 @@ QUrl WebView::url() const
     return m_initialUrl;
 }
 
-void WebView::onIconChanged(const QIcon &icon)
-{
+void WebView::onIconChanged(const QIcon &icon) {
     if (icon.isNull())
         emit iconChanged(BrowserService::instance()->defaultIcon());
     else
         emit iconChanged(icon);
 }
 
-void WebView::mousePressEvent(QMouseEvent *event)
-{
+void WebView::mousePressEvent(QMouseEvent *event) {
     m_page->m_pressedButtons = event->buttons();
     m_page->m_keyboardModifiers = event->modifiers();
     QWebEngineView::mousePressEvent(event);
 }
 
-void WebView::mouseReleaseEvent(QMouseEvent *event)
-{
+void WebView::mouseReleaseEvent(QMouseEvent *event) {
     QWebEngineView::mouseReleaseEvent(event);
     if (!event->isAccepted() && (m_page->m_pressedButtons & Qt::MidButton)) {
         QUrl url(QApplication::clipboard()->text(QClipboard::Selection));
@@ -174,7 +160,6 @@ void WebView::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void WebView::setStatusBarText(const QString &string)
-{
+void WebView::setStatusBarText(const QString &string) {
     m_statusBarText = string;
 }

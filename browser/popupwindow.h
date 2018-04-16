@@ -10,9 +10,9 @@ public:
     QWebEnginePage* page() const;
 
 private slots:
-void setUrl(const QUrl &url);
+    void setUrl(const QUrl &url);
 
-void adjustGeometry(const QRect &newGeometry);
+    void adjustGeometry(const QRect &newGeometry);
 
 private:
     QLineEdit *m_addressBar;

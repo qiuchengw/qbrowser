@@ -15,7 +15,7 @@ protected:
 #endif
     virtual bool certificateError(const QWebEngineCertificateError &error) Q_DECL_OVERRIDE;
 
-    private slots:
+private slots:
 #if defined(QWEBENGINEPAGE_UNSUPPORTEDCONTENT)
     void handleUnsupportedContent(QNetworkReply *reply);
 #endif

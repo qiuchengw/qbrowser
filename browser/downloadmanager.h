@@ -56,8 +56,7 @@
 
 
 class DownloadManager;
-class DownloadWidget : public QWidget, public Ui_DownloadItem
-{
+class DownloadWidget : public QWidget, public Ui_DownloadItem {
     Q_OBJECT
 
 signals:
@@ -98,8 +97,7 @@ QT_BEGIN_NAMESPACE
 class QFileIconProvider;
 QT_END_NAMESPACE
 
-class DownloadManager : public QDialog, public Ui_DownloadDialog
-{
+class DownloadManager : public QDialog, public Ui_DownloadDialog {
     Q_OBJECT
     Q_PROPERTY(RemovePolicy removePolicy READ removePolicy WRITE setRemovePolicy)
 
@@ -139,8 +137,7 @@ private:
     friend class DownloadModel;
 };
 
-class DownloadModel : public QAbstractListModel
-{
+class DownloadModel : public QAbstractListModel {
     friend class DownloadManager;
     Q_OBJECT
 

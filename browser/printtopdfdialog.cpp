@@ -56,8 +56,7 @@
 PrintToPdfDialog::PrintToPdfDialog(const QString &filePath, QWidget *parent) :
     QDialog(parent),
     currentPageLayout(QPageLayout(QPageSize(QPageSize::A4), QPageLayout::Portrait, QMarginsF(0.0, 0.0, 0.0, 0.0))),
-    ui(new Ui::PrintToPdfDialog)
-{
+    ui(new Ui::PrintToPdfDialog) {
     ui->setupUi(this);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     connect(ui->chooseFilePathButton, &QToolButton::clicked, this, &PrintToPdfDialog::onChooseFilePathButtonClicked);
@@ -70,13 +69,11 @@ PrintToPdfDialog::PrintToPdfDialog(const QString &filePath, QWidget *parent) :
     setFilePath(filePath);
 }
 
-PrintToPdfDialog::~PrintToPdfDialog()
-{
+PrintToPdfDialog::~PrintToPdfDialog() {
     delete ui;
 }
 
-void PrintToPdfDialog::onChoosePageLayoutButtonClicked()
-{
+void PrintToPdfDialog::onChoosePageLayoutButtonClicked() {
 #ifndef QT_NO_PRINTER
     QPrinter printer;
     printer.setPageLayout(currentPageLayout);
@@ -90,8 +87,7 @@ void PrintToPdfDialog::onChoosePageLayoutButtonClicked()
 #endif // QT_NO_PRINTER
 }
 
-void PrintToPdfDialog::onChooseFilePathButtonClicked()
-{
+void PrintToPdfDialog::onChooseFilePathButtonClicked() {
     QFileInfo fi(filePath());
     QFileDialog dlg(this, tr("Save PDF as"), fi.absolutePath());
     dlg.setAcceptMode(QFileDialog::AcceptSave);
@@ -102,26 +98,22 @@ void PrintToPdfDialog::onChooseFilePathButtonClicked()
     setFilePath(dlg.selectedFiles().first());
 }
 
-QString PrintToPdfDialog::filePath() const
-{
+QString PrintToPdfDialog::filePath() const {
     return QDir::fromNativeSeparators(ui->filePathLineEdit->text());
 }
 
-void PrintToPdfDialog::setFilePath(const QString &filePath)
-{
+void PrintToPdfDialog::setFilePath(const QString &filePath) {
     ui->filePathLineEdit->setText(QDir::toNativeSeparators(filePath));
 }
 
-QPageLayout PrintToPdfDialog::pageLayout() const
-{
+QPageLayout PrintToPdfDialog::pageLayout() const {
     return currentPageLayout;
 }
 
-void PrintToPdfDialog::updatePageLayoutLabel()
-{
+void PrintToPdfDialog::updatePageLayoutLabel() {
     ui->pageLayoutLabel->setText(QString("%1, %2").arg(
-                                   currentPageLayout.pageSize().name()).arg(
-                                   currentPageLayout.orientation() == QPageLayout::Portrait
-                                   ? tr("Portrait") : tr("Landscape")
-                                   ));
+                                     currentPageLayout.pageSize().name()).arg(
+                                     currentPageLayout.orientation() == QPageLayout::Portrait
+                                     ? tr("Portrait") : tr("Landscape")
+                                 ));
 }

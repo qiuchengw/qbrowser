@@ -61,30 +61,25 @@ const QWebEngineDownloadItem::SavePageFormat SavePageDialog::m_indexToFormatTabl
 SavePageDialog::SavePageDialog(QWidget *parent, QWebEngineDownloadItem::SavePageFormat format,
                                const QString &filePath)
     : QDialog(parent)
-    , ui(new Ui::SavePageDialog)
-{
+    , ui(new Ui::SavePageDialog) {
     ui->setupUi(this);
     ui->formatComboBox->setCurrentIndex(formatToIndex(format));
     setFilePath(filePath);
 }
 
-SavePageDialog::~SavePageDialog()
-{
+SavePageDialog::~SavePageDialog() {
     delete ui;
 }
 
-QWebEngineDownloadItem::SavePageFormat SavePageDialog::pageFormat() const
-{
+QWebEngineDownloadItem::SavePageFormat SavePageDialog::pageFormat() const {
     return indexToFormat(ui->formatComboBox->currentIndex());
 }
 
-QString SavePageDialog::filePath() const
-{
+QString SavePageDialog::filePath() const {
     return QDir::fromNativeSeparators(ui->filePathLineEdit->text());
 }
 
-void SavePageDialog::on_chooseFilePathButton_clicked()
-{
+void SavePageDialog::on_chooseFilePathButton_clicked() {
     QFileInfo fi(filePath());
     QFileDialog dlg(this, tr("Save Page As"), fi.absolutePath());
     dlg.setAcceptMode(QFileDialog::AcceptSave);
@@ -96,13 +91,11 @@ void SavePageDialog::on_chooseFilePathButton_clicked()
     ensureFileSuffix(pageFormat());
 }
 
-void SavePageDialog::on_formatComboBox_currentIndexChanged(int idx)
-{
+void SavePageDialog::on_formatComboBox_currentIndexChanged(int idx) {
     ensureFileSuffix(indexToFormat(idx));
 }
 
-int SavePageDialog::formatToIndex(QWebEngineDownloadItem::SavePageFormat format)
-{
+int SavePageDialog::formatToIndex(QWebEngineDownloadItem::SavePageFormat format) {
     for (auto i : m_indexToFormatTable) {
         if (m_indexToFormatTable[i] == format)
             return i;
@@ -110,27 +103,23 @@ int SavePageDialog::formatToIndex(QWebEngineDownloadItem::SavePageFormat format)
     Q_UNREACHABLE();
 }
 
-QWebEngineDownloadItem::SavePageFormat SavePageDialog::indexToFormat(int idx)
-{
+QWebEngineDownloadItem::SavePageFormat SavePageDialog::indexToFormat(int idx) {
     Q_ASSERT(idx >= 0 && size_t(idx) < (sizeof(m_indexToFormatTable)
                                         / sizeof(QWebEngineDownloadItem::SavePageFormat)));
     return m_indexToFormatTable[idx];
 }
 
-QString SavePageDialog::suffixOfFormat(QWebEngineDownloadItem::SavePageFormat format)
-{
+QString SavePageDialog::suffixOfFormat(QWebEngineDownloadItem::SavePageFormat format) {
     if (format == QWebEngineDownloadItem::MimeHtmlSaveFormat)
         return QStringLiteral(".mhtml");
     return QStringLiteral(".html");
 }
 
-void SavePageDialog::setFilePath(const QString &filePath)
-{
+void SavePageDialog::setFilePath(const QString &filePath) {
     ui->filePathLineEdit->setText(QDir::toNativeSeparators(filePath));
 }
 
-void SavePageDialog::ensureFileSuffix(QWebEngineDownloadItem::SavePageFormat format)
-{
+void SavePageDialog::ensureFileSuffix(QWebEngineDownloadItem::SavePageFormat format) {
     QFileInfo fi(filePath());
     setFilePath(fi.absolutePath() + QLatin1Char('/') + fi.completeBaseName()
                 + suffixOfFormat(format));

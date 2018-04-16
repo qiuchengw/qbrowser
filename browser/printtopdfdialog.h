@@ -58,8 +58,7 @@ class PrintToPdfDialog;
 }
 QT_END_NAMESPACE
 
-class PrintToPdfDialog : public QDialog
-{
+class PrintToPdfDialog : public QDialog {
     Q_OBJECT
 
 public:

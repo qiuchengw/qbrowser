@@ -53,8 +53,7 @@
 
 #include "ui_settings.h"
 
-class SettingsDialog : public QDialog, public Ui_Settings
-{
+class SettingsDialog : public QDialog, public Ui_Settings {
     Q_OBJECT
 
 public:

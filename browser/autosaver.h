@@ -58,7 +58,7 @@
   */
 class AutoSaver : public QObject {
 
-Q_OBJECT
+    Q_OBJECT
 
 public:
     AutoSaver(QObject *parent);

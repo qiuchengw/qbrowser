@@ -34,14 +34,14 @@ public:
 
     void addFunctionPanel(BrowserFunctionPanel* panel);
 
-	void setDestoryNotify(BrowserDestoryCallback d) {
-		m_onDestroy = d;
-	}
+    void setDestoryNotify(BrowserDestoryCallback d) {
+        m_onDestroy = d;
+    }
 
-	// 请求创建browser的
-	void setCreateBrowserDelegate(CreateBrowserDelegater d) {
-		m_createBrowser = d;
-	}
+    // 请求创建browser的
+    void setCreateBrowserDelegate(CreateBrowserDelegater d) {
+        m_createBrowser = d;
+    }
 
 public:
     TabWidget *tabWidget() const;
@@ -153,8 +153,8 @@ private:
     QString m_printerOutputFileName;
     friend class BrowserService;
 
-	BrowserDestoryCallback m_onDestroy;
-	CreateBrowserDelegater m_createBrowser;
+    BrowserDestoryCallback m_onDestroy;
+    CreateBrowserDelegater m_createBrowser;
 };
 
 #endif // BROWSERMAINWINDOW_H

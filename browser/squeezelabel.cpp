@@ -51,12 +51,10 @@
 #include "stdafx.h"
 #include "squeezelabel.h"
 
-SqueezeLabel::SqueezeLabel(QWidget *parent) : QLabel(parent)
-{
+SqueezeLabel::SqueezeLabel(QWidget *parent) : QLabel(parent) {
 }
 
-void SqueezeLabel::paintEvent(QPaintEvent *event)
-{
+void SqueezeLabel::paintEvent(QPaintEvent *event) {
     QFontMetrics fm = fontMetrics();
     if (fm.width(text()) > contentsRect().width()) {
         QString elided = fm.elidedText(text(), Qt::ElideMiddle, width());

@@ -57,7 +57,7 @@ class QPushButton;
 QT_END_NAMESPACE
 
 class FeaturePermissionBar : public QWidget {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     FeaturePermissionBar(QWidget*);

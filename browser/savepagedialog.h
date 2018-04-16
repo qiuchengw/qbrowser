@@ -58,8 +58,7 @@ class SavePageDialog;
 }
 QT_END_NAMESPACE
 
-class SavePageDialog : public QDialog
-{
+class SavePageDialog : public QDialog {
     Q_OBJECT
 
 public:

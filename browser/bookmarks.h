@@ -57,8 +57,7 @@
 class AutoSaver;
 class BookmarkNode;
 class BookmarksModel;
-class BookmarksManager : public QObject
-{
+class BookmarksManager : public QObject {
     Q_OBJECT
 
 signals:
@@ -81,7 +80,9 @@ public:
     BookmarkNode *toolbar();
 
     BookmarksModel *bookmarksModel();
-    QUndoStack *undoRedoStack() { return &m_commands; };
+    QUndoStack *undoRedoStack() {
+        return &m_commands;
+    };
 
 public slots:
     void importBookmarks();
@@ -103,8 +104,7 @@ private:
     friend class ChangeBookmarkCommand;
 };
 
-class RemoveBookmarksCommand : public QUndoCommand
-{
+class RemoveBookmarksCommand : public QUndoCommand {
 
 public:
     RemoveBookmarksCommand(BookmarksManager *m_bookmarkManagaer, BookmarkNode *parent, int row);
@@ -120,23 +120,25 @@ protected:
     bool m_done;
 };
 
-class InsertBookmarksCommand : public RemoveBookmarksCommand
-{
+class InsertBookmarksCommand : public RemoveBookmarksCommand {
 
 public:
     InsertBookmarksCommand(BookmarksManager *m_bookmarkManagaer,
-        BookmarkNode *parent, BookmarkNode *node, int row);
-    void undo() { RemoveBookmarksCommand::redo(); }
-    void redo() { RemoveBookmarksCommand::undo(); }
+                           BookmarkNode *parent, BookmarkNode *node, int row);
+    void undo() {
+        RemoveBookmarksCommand::redo();
+    }
+    void redo() {
+        RemoveBookmarksCommand::undo();
+    }
 
 };
 
-class ChangeBookmarkCommand : public QUndoCommand
-{
+class ChangeBookmarkCommand : public QUndoCommand {
 
 public:
     ChangeBookmarkCommand(BookmarksManager *m_bookmarkManagaer,
-        BookmarkNode *node, const QString &newValue, bool title);
+                          BookmarkNode *node, const QString &newValue, bool title);
     void undo();
     void redo();
 
@@ -151,8 +153,7 @@ private:
 /*!
     BookmarksModel is a QAbstractItemModel wrapper around the BookmarkManager
   */
-class BookmarksModel : public QAbstractItemModel
-{
+class BookmarksModel : public QAbstractItemModel {
     Q_OBJECT
 
 public slots:
@@ -169,7 +170,9 @@ public:
     };
 
     BookmarksModel(BookmarksManager *bookmarkManager, QObject *parent = 0);
-    inline BookmarksManager *bookmarksManager() const { return m_bookmarksManager; }
+    inline BookmarksManager *bookmarksManager() const {
+        return m_bookmarksManager;
+    }
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
@@ -184,7 +187,7 @@ public:
     QMimeData *mimeData(const QModelIndexList &indexes) const;
     QStringList mimeTypes() const;
     bool dropMimeData(const QMimeData *data,
-        Qt::DropAction action, int row, int column, const QModelIndex &parent);
+                      Qt::DropAction action, int row, int column, const QModelIndex &parent);
     bool hasChildren(const QModelIndex &parent = QModelIndex()) const;
 
     BookmarkNode *node(const QModelIndex &index) const;
@@ -198,16 +201,15 @@ private:
 
 // Menu that is dynamically populated from the bookmarks
 #include "modelmenu.h"
-class BookmarksMenu : public ModelMenu
-{
+class BookmarksMenu : public ModelMenu {
     Q_OBJECT
 
 signals:
     void openUrl(const QUrl &url);
 
 public:
-     BookmarksMenu(QWidget *parent = 0);
-     void setInitialActions(QList<QAction*> actions);
+    BookmarksMenu(QWidget *parent = 0);
+    void setInitialActions(QList<QAction*> actions);
 
 protected:
     bool prePopulated();
@@ -225,8 +227,7 @@ private:
     are left behind.  Used in the add bookmark dialog combobox.
  */
 #include <QtCore/QSortFilterProxyModel>
-class AddBookmarkProxyModel : public QSortFilterProxyModel
-{
+class AddBookmarkProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 public:
     AddBookmarkProxyModel(QObject * parent = 0);
@@ -240,8 +241,7 @@ protected:
     Add bookmark dialog
  */
 #include "ui_addbookmarkdialog.h"
-class AddBookmarkDialog : public QDialog, public Ui_AddBookmarkDialog
-{
+class AddBookmarkDialog : public QDialog, public Ui_AddBookmarkDialog {
     Q_OBJECT
 
 public:
@@ -258,8 +258,7 @@ private:
 
 #include "ui_bookmarks.h"
 class TreeProxyModel;
-class BookmarksDialog : public QDialog, public Ui_BookmarksDialog
-{
+class BookmarksDialog : public QDialog, public Ui_BookmarksDialog {
     Q_OBJECT
 
 signals:
@@ -284,8 +283,7 @@ private:
 };
 
 #include <QtWidgets/QToolBar>
-class BookmarksToolBar : public QToolBar
-{
+class BookmarksToolBar : public QToolBar {
     Q_OBJECT
 
 signals:

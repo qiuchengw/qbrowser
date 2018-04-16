@@ -11,23 +11,21 @@
 WebPage::WebPage(QWebEngineProfile *profile, QObject *parent)
     : QWebEnginePage(profile, parent)
     , m_keyboardModifiers(Qt::NoModifier)
-    , m_pressedButtons(Qt::NoButton)
-{
+    , m_pressedButtons(Qt::NoButton) {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
     setNetworkAccessManager(BrowserService::networkAccessMan());
 #endif
 #if defined(QWEBENGINEPAGE_UNSUPPORTEDCONTENT)
     connect(this, SIGNAL(unsupportedContent(QNetworkReply*)),
-        this, SLOT(handleUnsupportedContent(QNetworkReply*)));
+            this, SLOT(handleUnsupportedContent(QNetworkReply*)));
 #endif
     connect(this, SIGNAL(authenticationRequired(const QUrl &, QAuthenticator*)),
-        SLOT(authenticationRequired(const QUrl &, QAuthenticator*)));
+            SLOT(authenticationRequired(const QUrl &, QAuthenticator*)));
     connect(this, SIGNAL(proxyAuthenticationRequired(const QUrl &, QAuthenticator *, const QString &)),
-        SLOT(proxyAuthenticationRequired(const QUrl &, QAuthenticator *, const QString &)));
+            SLOT(proxyAuthenticationRequired(const QUrl &, QAuthenticator *, const QString &)));
 }
 
-BrowserWnd *WebPage::mainWindow()
-{
+BrowserWnd *WebPage::mainWindow() {
     QObject *w = this->parent();
     while (w) {
         if (BrowserWnd *mw = qobject_cast<BrowserWnd*>(w))
@@ -37,16 +35,15 @@ BrowserWnd *WebPage::mainWindow()
     return BrowserService::instance()->browser();
 }
 
-bool WebPage::certificateError(const QWebEngineCertificateError &error)
-{
+bool WebPage::certificateError(const QWebEngineCertificateError &error) {
     if (error.isOverridable()) {
         QMessageBox msgBox;
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setText(error.errorDescription());
         msgBox.setInformativeText(tr("If you wish so, you may continue with an unverified certificate. "
-            "Accepting an unverified certificate means "
-            "you may not be connected with the host you tried to connect to.\n"
-            "Do you wish to override the security check and continue?"));
+                                     "Accepting an unverified certificate means "
+                                     "you may not be connected with the host you tried to connect to.\n"
+                                     "Do you wish to override the security check and continue?"));
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
         return msgBox.exec() == QMessageBox::Yes;
@@ -58,20 +55,16 @@ bool WebPage::certificateError(const QWebEngineCertificateError &error)
 
 // #include "webview.moc"
 
-QWebEnginePage *WebPage::createWindow(QWebEnginePage::WebWindowType type)
-{
+QWebEnginePage *WebPage::createWindow(QWebEnginePage::WebWindowType type) {
     if (type == QWebEnginePage::WebBrowserTab) {
         return mainWindow()->tabWidget()->newTab()->page();
-    }
-    else if (type == QWebEnginePage::WebBrowserBackgroundTab) {
+    } else if (type == QWebEnginePage::WebBrowserBackgroundTab) {
         return mainWindow()->tabWidget()->newTab(false)->page();
-    }
-    else if (type == QWebEnginePage::WebBrowserWindow) {
+    } else if (type == QWebEnginePage::WebBrowserWindow) {
         BrowserService::instance()->newBroswer();
         BrowserWnd *mainWindow = BrowserService::instance()->browser();
         return mainWindow->currentTab()->page();
-    }
-    else {
+    } else {
         PopupWindow *popup = new PopupWindow(profile());
         popup->setAttribute(Qt::WA_DeleteOnClose);
         popup->show();
@@ -80,8 +73,7 @@ QWebEnginePage *WebPage::createWindow(QWebEnginePage::WebWindowType type)
 }
 
 #if !defined(QT_NO_UITOOLS)
-QObject *WebPage::createPlugin(const QString &classId, const QUrl &url, const QStringList &paramNames, const QStringList &paramValues)
-{
+QObject *WebPage::createPlugin(const QString &classId, const QUrl &url, const QStringList &paramNames, const QStringList &paramValues) {
     Q_UNUSED(url);
     Q_UNUSED(paramNames);
     Q_UNUSED(paramValues);
@@ -91,8 +83,7 @@ QObject *WebPage::createPlugin(const QString &classId, const QUrl &url, const QS
 #endif // !defined(QT_NO_UITOOLS)
 
 #if defined(QWEBENGINEPAGE_UNSUPPORTEDCONTENT)
-void WebPage::handleUnsupportedContent(QNetworkReply *reply)
-{
+void WebPage::handleUnsupportedContent(QNetworkReply *reply) {
     QString errorString = reply->errorString();
 
     if (m_loadingUrl != reply->url()) {
@@ -111,11 +102,11 @@ void WebPage::handleUnsupportedContent(QNetworkReply *reply)
     Q_ASSERT(isOpened);
     Q_UNUSED(isOpened)
 
-        QString title = tr("Error loading page: %1").arg(reply->url().toString());
+    QString title = tr("Error loading page: %1").arg(reply->url().toString());
     QString html = QString(QLatin1String(file.readAll()))
-        .arg(title)
-        .arg(errorString)
-        .arg(reply->url().toString());
+                   .arg(title)
+                   .arg(errorString)
+                   .arg(reply->url().toString());
 
     QBuffer imageBuffer;
     imageBuffer.open(QBuffer::ReadWrite);
@@ -123,7 +114,7 @@ void WebPage::handleUnsupportedContent(QNetworkReply *reply)
     QPixmap pixmap = icon.pixmap(QSize(32, 32));
     if (pixmap.save(&imageBuffer, "PNG")) {
         html.replace(QLatin1String("IMAGE_BINARY_DATA_HERE"),
-            QString(QLatin1String(imageBuffer.buffer().toBase64())));
+                     QString(QLatin1String(imageBuffer.buffer().toBase64())));
     }
 
     QList<QWebEngineFrame*> frames;
@@ -144,8 +135,7 @@ void WebPage::handleUnsupportedContent(QNetworkReply *reply)
 }
 #endif
 
-void WebPage::authenticationRequired(const QUrl &requestUrl, QAuthenticator *auth)
-{
+void WebPage::authenticationRequired(const QUrl &requestUrl, QAuthenticator *auth) {
     BrowserWnd *mainWindow = BrowserService::instance()->browser();
 
     QDialog dialog(mainWindow);
@@ -165,15 +155,13 @@ void WebPage::authenticationRequired(const QUrl &requestUrl, QAuthenticator *aut
     if (dialog.exec() == QDialog::Accepted) {
         auth->setUser(passwordDialog.userNameLineEdit->text());
         auth->setPassword(passwordDialog.passwordLineEdit->text());
-    }
-    else {
+    } else {
         // Set authenticator null if dialog is cancelled
         *auth = QAuthenticator();
     }
 }
 
-void WebPage::proxyAuthenticationRequired(const QUrl &requestUrl, QAuthenticator *auth, const QString &proxyHost)
-{
+void WebPage::proxyAuthenticationRequired(const QUrl &requestUrl, QAuthenticator *auth, const QString &proxyHost) {
     Q_UNUSED(requestUrl);
     BrowserWnd *mainWindow = BrowserService::instance()->browser();
 
@@ -194,8 +182,7 @@ void WebPage::proxyAuthenticationRequired(const QUrl &requestUrl, QAuthenticator
     if (dialog.exec() == QDialog::Accepted) {
         auth->setUser(proxyDialog.userNameLineEdit->text());
         auth->setPassword(proxyDialog.passwordLineEdit->text());
-    }
-    else {
+    } else {
         // Set authenticator null if dialog is cancelled
         *auth = QAuthenticator();
     }

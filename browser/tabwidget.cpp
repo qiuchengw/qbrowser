@@ -62,8 +62,7 @@
 #include "webpage.h"
 
 TabBar::TabBar(QWidget *parent)
-    : QTabBar(parent)
-{
+    : QTabBar(parent) {
     setContextMenuPolicy(Qt::CustomContextMenu);
     setAcceptDrops(true);
     connect(this, SIGNAL(customContextMenuRequested(QPoint)),
@@ -84,53 +83,50 @@ TabBar::TabBar(QWidget *parent)
     setStyleSheet("QTabBar::tab{max-width:200px;}");
 }
 
-TabWidget::~TabWidget()
-{
+TabWidget::~TabWidget() {
     delete m_fullScreenNotification;
     delete m_fullScreenView;
 }
 
-void TabBar::selectTabAction()
-{
+void TabBar::selectTabAction() {
     if (QShortcut *shortCut = qobject_cast<QShortcut*>(sender())) {
         int index = m_tabShortcuts.indexOf(shortCut);
         setCurrentIndex(index);
     }
 }
 
-void TabBar::contextMenuRequested(const QPoint &position)
-{
+void TabBar::contextMenuRequested(const QPoint &position) {
     QMenu menu;
     menu.addAction(tr("New &Tab"), this, SIGNAL(newTab()), QKeySequence::AddTab);
     int index = tabAt(position);
     if (-1 != index) {
         QAction *action = menu.addAction(tr("Clone Tab"),
-                this, SLOT(cloneTab()));
+                                         this, SLOT(cloneTab()));
         action->setData(index);
 
         menu.addSeparator();
 
         action = menu.addAction(tr("&Close Tab"),
-                this, SLOT(closeTab()), QKeySequence::Close);
+                                this, SLOT(closeTab()), QKeySequence::Close);
         action->setData(index);
 
         action = menu.addAction(tr("Close &Other Tabs"),
-                this, SLOT(closeOtherTabs()));
+                                this, SLOT(closeOtherTabs()));
         action->setData(index);
 
         menu.addSeparator();
 
         action = menu.addAction(tr("Reload Tab"),
-                this, SLOT(reloadTab()), QKeySequence::Refresh);
+                                this, SLOT(reloadTab()), QKeySequence::Refresh);
         action->setData(index);
 
         // Audio mute / unmute.
         action = menu.addAction(tr("Mute tab"),
-                this, SLOT(muteTab()));
+                                this, SLOT(muteTab()));
         action->setData(index);
 
         action = menu.addAction(tr("Unmute tab"),
-                this, SLOT(unmuteTab()));
+                                this, SLOT(unmuteTab()));
         action->setData(index);
     } else {
         menu.addSeparator();
@@ -139,32 +135,28 @@ void TabBar::contextMenuRequested(const QPoint &position)
     menu.exec(QCursor::pos());
 }
 
-void TabBar::cloneTab()
-{
+void TabBar::cloneTab() {
     if (QAction *action = qobject_cast<QAction*>(sender())) {
         int index = action->data().toInt();
         emit cloneTab(index);
     }
 }
 
-void TabBar::closeTab()
-{
+void TabBar::closeTab() {
     if (QAction *action = qobject_cast<QAction*>(sender())) {
         int index = action->data().toInt();
         emit closeTab(index);
     }
 }
 
-void TabBar::closeOtherTabs()
-{
+void TabBar::closeOtherTabs() {
     if (QAction *action = qobject_cast<QAction*>(sender())) {
         int index = action->data().toInt();
         emit closeOtherTabs(index);
     }
 }
 
-void TabBar::mousePressEvent(QMouseEvent *event)
-{
+void TabBar::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton)
         m_dragStartPos = event->pos();
 
@@ -180,14 +172,13 @@ void TabBar::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void TabBar::mouseMoveEvent(QMouseEvent *event)
-{
+void TabBar::mouseMoveEvent(QMouseEvent *event) {
     if (event->buttons() == Qt::LeftButton) {
         int diffX = event->pos().x() - m_dragStartPos.x();
         int diffY = event->pos().y() - m_dragStartPos.y();
         if ((event->pos() - m_dragStartPos).manhattanLength() > QApplication::startDragDistance()
-            && diffX < 3 && diffX > -3
-            && diffY < -10) {
+                && diffX < 3 && diffX > -3
+                && diffY < -10) {
             QDrag *drag = new QDrag(this);
             QMimeData *mimeData = new QMimeData;
             QList<QUrl> urls;
@@ -205,8 +196,7 @@ void TabBar::mouseMoveEvent(QMouseEvent *event)
 }
 
 // When index is -1 index chooses the current tab
-void TabWidget::reloadTab(int index)
-{
+void TabWidget::reloadTab(int index) {
     if (index < 0)
         index = currentIndex();
     if (index < 0 || index >= count())
@@ -217,24 +207,21 @@ void TabWidget::reloadTab(int index)
         tab->reload();
 }
 
-void TabBar::reloadTab()
-{
+void TabBar::reloadTab() {
     if (QAction *action = qobject_cast<QAction*>(sender())) {
         int index = action->data().toInt();
         emit reloadTab(index);
     }
 }
 
-void TabBar::muteTab()
-{
+void TabBar::muteTab() {
     if (QAction *action = qobject_cast<QAction*>(sender())) {
         int index = action->data().toInt();
         emit muteTab(index, true);
     }
 }
 
-void TabBar::unmuteTab()
-{
+void TabBar::unmuteTab() {
     if (QAction *action = qobject_cast<QAction*>(sender())) {
         int index = action->data().toInt();
         emit muteTab(index, false);
@@ -254,8 +241,7 @@ TabWidget::TabWidget(QWidget *parent)
     , m_tabBar(new TabBar(this))
     , m_profile(QWebEngineProfile::defaultProfile())
     , m_fullScreenView(0)
-    , m_fullScreenNotification(0)
-{
+    , m_fullScreenNotification(0) {
     setElideMode(Qt::ElideRight);
 
     connect(m_tabBar, SIGNAL(newTab()), this, SLOT(newTab()));
@@ -309,13 +295,12 @@ TabWidget::TabWidget(QWidget *parent)
     m_recentlyClosedTabsAction->setEnabled(false);
 
     connect(this, SIGNAL(currentChanged(int)),
-        this, SLOT(onCurrentChanged(int)));
+            this, SLOT(onCurrentChanged(int)));
 
     m_lineEdits = new QStackedWidget(this);
 }
 
-void TabWidget::clear()
-{
+void TabWidget::clear() {
     // clear the recently closed tabs
     m_recentlyClosedTabs.clear();
     // clear the line edit history
@@ -325,15 +310,13 @@ void TabWidget::clear()
     }
 }
 
-void TabWidget::moveTab(int fromIndex, int toIndex)
-{
+void TabWidget::moveTab(int fromIndex, int toIndex) {
     QWidget *lineEdit = m_lineEdits->widget(fromIndex);
     m_lineEdits->removeWidget(lineEdit);
     m_lineEdits->insertWidget(toIndex, lineEdit);
 }
 
-void TabWidget::setAudioMutedForTab(int index, bool mute)
-{
+void TabWidget::setAudioMutedForTab(int index, bool mute) {
     if (index < 0)
         index = currentIndex();
     if (index < 0 || index >= count())
@@ -344,15 +327,13 @@ void TabWidget::setAudioMutedForTab(int index, bool mute)
         tab->page()->setAudioMuted(mute);
 }
 
-void TabWidget::addWebAction(QAction *action, QWebEnginePage::WebAction webAction)
-{
+void TabWidget::addWebAction(QAction *action, QWebEnginePage::WebAction webAction) {
     if (!action)
         return;
     m_actions.append(new WebActionMapper(action, webAction, this));
 }
 
-void TabWidget::onCurrentChanged(int index)
-{
+void TabWidget::onCurrentChanged(int index) {
     WebView *webView = this->webView(index);
     if (!webView)
         return;
@@ -363,16 +344,16 @@ void TabWidget::onCurrentChanged(int index)
     if (oldWebView) {
 #if defined(QWEBENGINEVIEW_STATUSBARMESSAGE)
         disconnect(oldWebView, SIGNAL(statusBarMessage(QString)),
-                this, SIGNAL(showStatusBarMessage(QString)));
+                   this, SIGNAL(showStatusBarMessage(QString)));
 #endif
         disconnect(oldWebView->page(), SIGNAL(linkHovered(const QString&)),
-                this, SIGNAL(linkHovered(const QString&)));
+                   this, SIGNAL(linkHovered(const QString&)));
         disconnect(oldWebView, SIGNAL(loadProgress(int)),
-                this, SIGNAL(loadProgress(int)));
+                   this, SIGNAL(loadProgress(int)));
         disconnect(oldWebView->page()->profile(), SIGNAL(downloadRequested(QWebEngineDownloadItem*)),
-                this, SLOT(downloadRequested(QWebEngineDownloadItem*)));
+                   this, SLOT(downloadRequested(QWebEngineDownloadItem*)));
         disconnect(oldWebView->page(), SIGNAL(fullScreenRequested(QWebEngineFullScreenRequest)),
-                this, SLOT(fullScreenRequested(QWebEngineFullScreenRequest)));
+                   this, SLOT(fullScreenRequested(QWebEngineFullScreenRequest)));
     }
 
 #if defined(QWEBENGINEVIEW_STATUSBARMESSAGE)
@@ -402,8 +383,7 @@ void TabWidget::onCurrentChanged(int index)
         webView->setFocus();
 }
 
-void TabWidget::fullScreenRequested(QWebEngineFullScreenRequest request)
-{
+void TabWidget::fullScreenRequested(QWebEngineFullScreenRequest request) {
     WebPage *webPage = qobject_cast<WebPage*>(sender());
     if (request.toggleOn()) {
         if (!m_fullScreenView) {
@@ -437,62 +417,51 @@ void TabWidget::fullScreenRequested(QWebEngineFullScreenRequest request)
     }
 }
 
-void TabWidget::handleTabBarDoubleClicked(int index)
-{
+void TabWidget::handleTabBarDoubleClicked(int index) {
     if (index != -1) return;
     newTab();
 }
 
-QAction *TabWidget::newTabAction() const
-{
+QAction *TabWidget::newTabAction() const {
     return m_newTabAction;
 }
 
-QAction *TabWidget::closeTabAction() const
-{
+QAction *TabWidget::closeTabAction() const {
     return m_closeTabAction;
 }
 
-QAction *TabWidget::recentlyClosedTabsAction() const
-{
+QAction *TabWidget::recentlyClosedTabsAction() const {
     return m_recentlyClosedTabsAction;
 }
 
-QAction *TabWidget::nextTabAction() const
-{
+QAction *TabWidget::nextTabAction() const {
     return m_nextTabAction;
 }
 
-QAction *TabWidget::previousTabAction() const
-{
+QAction *TabWidget::previousTabAction() const {
     return m_previousTabAction;
 }
 
-QWidget *TabWidget::lineEditStack() const
-{
+QWidget *TabWidget::lineEditStack() const {
     return m_lineEdits;
 }
 
-QLineEdit *TabWidget::currentLineEdit() const
-{
+QLineEdit *TabWidget::currentLineEdit() const {
     return lineEdit(m_lineEdits->currentIndex());
 }
 
-WebView *TabWidget::currentWebView() const
-{
+WebView *TabWidget::currentWebView() const {
     return webView(currentIndex());
 }
 
-QLineEdit *TabWidget::lineEdit(int index) const
-{
+QLineEdit *TabWidget::lineEdit(int index) const {
     UrlLineEdit *urlLineEdit = qobject_cast<UrlLineEdit*>(m_lineEdits->widget(index));
     if (urlLineEdit)
         return urlLineEdit->lineEdit();
     return 0;
 }
 
-WebView *TabWidget::webView(int index) const
-{
+WebView *TabWidget::webView(int index) const {
     QWidget *widget = this->widget(index);
     if (WebView *webView = qobject_cast<WebView*>(widget)) {
         return webView;
@@ -510,14 +479,12 @@ WebView *TabWidget::webView(int index) const
     return 0;
 }
 
-int TabWidget::webViewIndex(WebView *webView) const
-{
+int TabWidget::webViewIndex(WebView *webView) const {
     int index = indexOf(webView);
     return index;
 }
 
-void TabWidget::setupPage(QWebEnginePage* page)
-{
+void TabWidget::setupPage(QWebEnginePage* page) {
     connect(page, SIGNAL(windowCloseRequested()),
             this, SLOT(windowCloseRequested()));
     connect(page, SIGNAL(geometryChangeRequested(QRect)),
@@ -546,8 +513,7 @@ void TabWidget::setupPage(QWebEnginePage* page)
     }
 }
 
-WebView *TabWidget::newTab(bool makeCurrent)
-{
+WebView *TabWidget::newTab(bool makeCurrent) {
     // line edit
     UrlLineEdit *urlLineEdit = new UrlLineEdit;
     QLineEdit *lineEdit = urlLineEdit->lineEdit();
@@ -574,10 +540,10 @@ WebView *TabWidget::newTab(bool makeCurrent)
         emptyWidget->setPalette(p);
         emptyWidget->setAutoFillBackground(true);
         disconnect(this, SIGNAL(currentChanged(int)),
-            this, SLOT(onCurrentChanged(int)));
+                   this, SLOT(onCurrentChanged(int)));
         addTab(emptyWidget, tr("(Untitled)"));
         connect(this, SIGNAL(currentChanged(int)),
-            this, SLOT(onCurrentChanged(int)));
+                this, SLOT(onCurrentChanged(int)));
         return 0;
     }
 
@@ -611,8 +577,7 @@ WebView *TabWidget::newTab(bool makeCurrent)
     return webView;
 }
 
-void TabWidget::reloadAllTabs()
-{
+void TabWidget::reloadAllTabs() {
     for (int i = 0; i < count(); ++i) {
         QWidget *tabWidget = widget(i);
         if (WebView *tab = qobject_cast<WebView*>(tabWidget)) {
@@ -621,8 +586,7 @@ void TabWidget::reloadAllTabs()
     }
 }
 
-void TabWidget::lineEditReturnPressed()
-{
+void TabWidget::lineEditReturnPressed() {
     if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(sender())) {
         emit loadPage(lineEdit->text());
         if (m_lineEdits->currentWidget() == lineEdit)
@@ -630,8 +594,7 @@ void TabWidget::lineEditReturnPressed()
     }
 }
 
-void TabWidget::windowCloseRequested()
-{
+void TabWidget::windowCloseRequested() {
     WebPage *webPage = qobject_cast<WebPage*>(sender());
     WebView *webView = qobject_cast<WebView*>(webPage->view());
     int index = webViewIndex(webView);
@@ -639,8 +602,7 @@ void TabWidget::windowCloseRequested()
         closeTab(index);
 }
 
-void TabWidget::closeOtherTabs(int index)
-{
+void TabWidget::closeOtherTabs(int index) {
     if (-1 == index)
         return;
     for (int i = count() - 1; i > index; --i)
@@ -650,8 +612,7 @@ void TabWidget::closeOtherTabs(int index)
 }
 
 // When index is -1 index chooses the current tab
-void TabWidget::cloneTab(int index)
-{
+void TabWidget::cloneTab(int index) {
     if (index < 0)
         index = currentIndex();
     if (index < 0 || index >= count())
@@ -661,8 +622,7 @@ void TabWidget::cloneTab(int index)
 }
 
 // When index is -1 index chooses the current tab
-void TabWidget::requestCloseTab(int index)
-{
+void TabWidget::requestCloseTab(int index) {
     if (index < 0)
         index = currentIndex();
     if (index < 0 || index >= count())
@@ -674,8 +634,7 @@ void TabWidget::requestCloseTab(int index)
     tab->page()->triggerAction(QWebEnginePage::RequestClose);
 }
 
-void TabWidget::closeTab(int index)
-{
+void TabWidget::closeTab(int index) {
     if (index < 0 || index >= count())
         return;
 
@@ -703,8 +662,7 @@ void TabWidget::closeTab(int index)
         emit lastTabClosed();
 }
 
-void TabWidget::setProfile(QWebEngineProfile *profile)
-{
+void TabWidget::setProfile(QWebEngineProfile *profile) {
     m_profile = profile;
     for (int i = 0; i < count(); ++i) {
         QWidget *tabWidget = widget(i);
@@ -717,8 +675,7 @@ void TabWidget::setProfile(QWebEngineProfile *profile)
     }
 }
 
-void TabWidget::webViewLoadStarted()
-{
+void TabWidget::webViewLoadStarted() {
     WebView *webView = qobject_cast<WebView*>(sender());
     int index = webViewIndex(webView);
     if (-1 != index) {
@@ -727,16 +684,14 @@ void TabWidget::webViewLoadStarted()
     }
 }
 
-void TabWidget::webViewIconChanged(const QIcon &icon)
-{
+void TabWidget::webViewIconChanged(const QIcon &icon) {
     WebView *webView = qobject_cast<WebView*>(sender());
     int index = webViewIndex(webView);
     if (-1 != index)
         setTabIcon(index, icon);
 }
 
-void TabWidget::webViewTitleChanged(const QString &title)
-{
+void TabWidget::webViewTitleChanged(const QString &title) {
     WebView *webView = qobject_cast<WebView*>(sender());
     int index = webViewIndex(webView);
     if (-1 != index) {
@@ -764,8 +719,7 @@ void TabWidget::webPageMutedOrAudibleChanged() {
     }
 }
 
-void TabWidget::webViewUrlChanged(const QUrl &url)
-{
+void TabWidget::webViewUrlChanged(const QUrl &url) {
     WebView *webView = qobject_cast<WebView*>(sender());
     int index = webViewIndex(webView);
     if (-1 != index) {
@@ -777,8 +731,7 @@ void TabWidget::webViewUrlChanged(const QUrl &url)
     emit tabsChanged();
 }
 
-void TabWidget::aboutToShowRecentTabsMenu()
-{
+void TabWidget::aboutToShowRecentTabsMenu() {
     m_recentlyClosedTabsMenu->clear();
     for (int i = 0; i < m_recentlyClosedTabs.count(); ++i) {
         QAction *action = new QAction(m_recentlyClosedTabsMenu);
@@ -790,14 +743,12 @@ void TabWidget::aboutToShowRecentTabsMenu()
     }
 }
 
-void TabWidget::aboutToShowRecentTriggeredAction(QAction *action)
-{
+void TabWidget::aboutToShowRecentTriggeredAction(QAction *action) {
     QUrl url = action->data().toUrl();
     loadUrlInCurrentTab(url);
 }
 
-void TabWidget::mouseDoubleClickEvent(QMouseEvent *event)
-{
+void TabWidget::mouseDoubleClickEvent(QMouseEvent *event) {
     if (!childAt(event->pos())
             // Remove the line below when QTabWidget does not have a one pixel frame
             && event->pos().y() < (tabBar()->y() + tabBar()->height())) {
@@ -807,8 +758,7 @@ void TabWidget::mouseDoubleClickEvent(QMouseEvent *event)
     QTabWidget::mouseDoubleClickEvent(event);
 }
 
-void TabWidget::contextMenuEvent(QContextMenuEvent *event)
-{
+void TabWidget::contextMenuEvent(QContextMenuEvent *event) {
     if (!childAt(event->pos())) {
         m_tabBar->contextMenuRequested(event->pos());
         return;
@@ -816,8 +766,7 @@ void TabWidget::contextMenuEvent(QContextMenuEvent *event)
     QTabWidget::contextMenuEvent(event);
 }
 
-void TabWidget::mouseReleaseEvent(QMouseEvent *event)
-{
+void TabWidget::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::MidButton && !childAt(event->pos())
             // Remove the line below when QTabWidget does not have a one pixel frame
             && event->pos().y() < (tabBar()->y() + tabBar()->height())) {
@@ -829,8 +778,7 @@ void TabWidget::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void TabWidget::loadUrlInCurrentTab(const QUrl &url)
-{
+void TabWidget::loadUrlInCurrentTab(const QUrl &url) {
     WebView *webView = currentWebView();
     if (webView) {
         webView->loadUrl(url);
@@ -838,16 +786,14 @@ void TabWidget::loadUrlInCurrentTab(const QUrl &url)
     }
 }
 
-void TabWidget::nextTab()
-{
+void TabWidget::nextTab() {
     int next = currentIndex() + 1;
     if (next == count())
         next = 0;
     setCurrentIndex(next);
 }
 
-void TabWidget::previousTab()
-{
+void TabWidget::previousTab() {
     int next = currentIndex() - 1;
     if (next < 0)
         next = count() - 1;
@@ -856,8 +802,7 @@ void TabWidget::previousTab()
 
 static const qint32 TabWidgetMagic = 0xaa;
 
-QByteArray TabWidget::saveState() const
-{
+QByteArray TabWidget::saveState() const {
     int version = 1;
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
@@ -878,8 +823,7 @@ QByteArray TabWidget::saveState() const
     return data;
 }
 
-bool TabWidget::restoreState(const QByteArray &state)
-{
+bool TabWidget::restoreState(const QByteArray &state) {
     int version = 1;
     QByteArray sd = state;
     QDataStream stream(&sd, QIODevice::ReadOnly);
@@ -909,8 +853,7 @@ bool TabWidget::restoreState(const QByteArray &state)
     return true;
 }
 
-void TabWidget::downloadRequested(QWebEngineDownloadItem *download)
-{
+void TabWidget::downloadRequested(QWebEngineDownloadItem *download) {
     if (download->savePageFormat() != QWebEngineDownloadItem::UnknownSaveFormat) {
         SavePageDialog dlg(this, download->savePageFormat(), download->path());
         if (dlg.exec() != SavePageDialog::Accepted)
@@ -927,8 +870,7 @@ WebActionMapper::WebActionMapper(QAction *root, QWebEnginePage::WebAction webAct
     : QObject(parent)
     , m_currentParent(0)
     , m_root(root)
-    , m_webAction(webAction)
-{
+    , m_webAction(webAction) {
     if (!m_root)
         return;
     connect(m_root, SIGNAL(triggered()), this, SLOT(rootTriggered()));
@@ -936,50 +878,43 @@ WebActionMapper::WebActionMapper(QAction *root, QWebEnginePage::WebAction webAct
     root->setEnabled(false);
 }
 
-void WebActionMapper::rootDestroyed()
-{
+void WebActionMapper::rootDestroyed() {
     m_root = 0;
 }
 
-void WebActionMapper::currentDestroyed()
-{
+void WebActionMapper::currentDestroyed() {
     updateCurrent(0);
 }
 
-void WebActionMapper::addChild(QAction *action)
-{
+void WebActionMapper::addChild(QAction *action) {
     if (!action)
         return;
     connect(action, SIGNAL(changed()), this, SLOT(childChanged()));
 }
 
-QWebEnginePage::WebAction WebActionMapper::webAction() const
-{
+QWebEnginePage::WebAction WebActionMapper::webAction() const {
     return m_webAction;
 }
 
-void WebActionMapper::rootTriggered()
-{
+void WebActionMapper::rootTriggered() {
     if (m_currentParent) {
         QAction *gotoAction = m_currentParent->action(m_webAction);
         gotoAction->trigger();
     }
 }
 
-void WebActionMapper::childChanged()
-{
+void WebActionMapper::childChanged() {
     if (QAction *source = qobject_cast<QAction*>(sender())) {
         if (m_root
-            && m_currentParent
-            && source->parent() == m_currentParent) {
+                && m_currentParent
+                && source->parent() == m_currentParent) {
             m_root->setChecked(source->isChecked());
             m_root->setEnabled(source->isEnabled());
         }
     }
 }
 
-void WebActionMapper::updateCurrent(QWebEnginePage *currentParent)
-{
+void WebActionMapper::updateCurrent(QWebEnginePage *currentParent) {
     if (m_currentParent)
         disconnect(m_currentParent, SIGNAL(destroyed(QObject*)),
                    this, SLOT(currentDestroyed()));

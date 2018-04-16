@@ -54,21 +54,22 @@
 #include "modelmenu.h"
 
 
-class HistoryItem
-{
+class HistoryItem {
 public:
     HistoryItem() {}
     HistoryItem(const QString &u,
                 const QDateTime &d = QDateTime(), const QString &t = QString())
         : title(t), url(u), dateTime(d) {}
 
-    inline bool operator==(const HistoryItem &other) const
-        { return other.title == title
-          && other.url == url && other.dateTime == dateTime; }
+    inline bool operator==(const HistoryItem &other) const {
+        return other.title == title
+               && other.url == url && other.dateTime == dateTime;
+    }
 
     // history is sorted in reverse
-    inline bool operator <(const HistoryItem &other) const
-        { return dateTime > other.dateTime; }
+    inline bool operator <(const HistoryItem &other) const {
+        return dateTime > other.dateTime;
+    }
 
     QString title;
     QString url;
@@ -80,8 +81,7 @@ class HistoryModel;
 class HistoryFilterModel;
 class HistoryTreeModel;
 
-class HistoryManager : public QObject
-{
+class HistoryManager : public QObject {
     Q_OBJECT
     Q_PROPERTY(int historyLimit READ historyLimit WRITE setHistoryLimit)
 
@@ -139,8 +139,7 @@ private:
     HistoryTreeModel *m_historyTreeModel;
 };
 
-class HistoryModel : public QAbstractTableModel
-{
+class HistoryModel : public QAbstractTableModel {
     Q_OBJECT
 
 public slots:
@@ -173,15 +172,16 @@ private:
     Both m_sourceRow and m_historyHash store their offsets not from
     the front of the list, but as offsets from the back.
   */
-class HistoryFilterModel : public QAbstractProxyModel
-{
+class HistoryFilterModel : public QAbstractProxyModel {
     Q_OBJECT
 
 public:
     HistoryFilterModel(QAbstractItemModel *sourceModel, QObject *parent = 0);
 
-    inline bool historyContains(const QString &url) const
-        { load(); return m_historyHash.contains(url); }
+    inline bool historyContains(const QString &url) const {
+        load();
+        return m_historyHash.contains(url);
+    }
 
     QModelIndex mapFromSource(const QModelIndex &sourceIndex) const;
     QModelIndex mapToSource(const QModelIndex &proxyIndex) const;
@@ -215,8 +215,7 @@ private:
     The mapping is done by knowing that HistoryTreeModel is over a table
     We store that row offset in our index's private data.
 */
-class HistoryMenuModel : public QAbstractProxyModel
-{
+class HistoryMenuModel : public QAbstractProxyModel {
     Q_OBJECT
 
 public:
@@ -235,16 +234,15 @@ private:
 };
 
 // Menu that is dynamically populated from the history
-class HistoryMenu : public ModelMenu
-{
+class HistoryMenu : public ModelMenu {
     Q_OBJECT
 
 signals:
     void openUrl(const QUrl &url);
 
 public:
-     HistoryMenu(QWidget *parent = 0);
-     void setInitialActions(QList<QAction*> actions);
+    HistoryMenu(QWidget *parent = 0);
+    void setInitialActions(QList<QAction*> actions);
 
 protected:
     bool prePopulated();
@@ -262,8 +260,7 @@ private:
 
 // proxy model for the history model that
 // exposes each url http://www.foo.com and it url starting at the host www.foo.com
-class HistoryCompletionModel : public QAbstractProxyModel
-{
+class HistoryCompletionModel : public QAbstractProxyModel {
     Q_OBJECT
 
 public:
@@ -285,8 +282,7 @@ private slots:
 // proxy model for the history model that converts the list
 // into a tree, one top level node per day.
 // Used in the HistoryDialog.
-class HistoryTreeModel : public QAbstractProxyModel
-{
+class HistoryTreeModel : public QAbstractProxyModel {
     Q_OBJECT
 
 public:
@@ -320,8 +316,7 @@ private:
 // A modified QSortFilterProxyModel that always accepts the root nodes in the tree
 // so filtering is only done on the children.
 // Used in the HistoryDialog
-class TreeProxyModel : public QSortFilterProxyModel
-{
+class TreeProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
 public:
@@ -333,8 +328,7 @@ protected:
 
 #include "ui_history.h"
 
-class HistoryDialog : public QDialog, public Ui_HistoryDialog
-{
+class HistoryDialog : public QDialog, public Ui_HistoryDialog {
     Q_OBJECT
 
 signals:

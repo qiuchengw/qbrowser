@@ -59,12 +59,10 @@ ChaseWidget::ChaseWidget(QWidget *parent, QPixmap pixmap, bool pixmapEnabled)
     , m_timerId(-1)
     , m_animated(false)
     , m_pixmap(pixmap)
-    , m_pixmapEnabled(pixmapEnabled)
-{
+    , m_pixmapEnabled(pixmapEnabled) {
 }
 
-void ChaseWidget::setAnimated(bool value)
-{
+void ChaseWidget::setAnimated(bool value) {
     if (m_animated == value)
         return;
     m_animated = value;
@@ -79,8 +77,7 @@ void ChaseWidget::setAnimated(bool value)
     update();
 }
 
-void ChaseWidget::paintEvent(QPaintEvent *event)
-{
+void ChaseWidget::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event);
     QPainter p(this);
     if (m_pixmapEnabled && !m_pixmap.isNull()) {
@@ -111,13 +108,11 @@ void ChaseWidget::paintEvent(QPaintEvent *event)
     }
 }
 
-QSize ChaseWidget::sizeHint() const
-{
+QSize ChaseWidget::sizeHint() const {
     return QSize(32, 32);
 }
 
-void ChaseWidget::timerEvent(QTimerEvent *event)
-{
+void ChaseWidget::timerEvent(QTimerEvent *event) {
     if (event->timerId() == m_timerId) {
         ++m_segment;
         update();
@@ -125,19 +120,16 @@ void ChaseWidget::timerEvent(QTimerEvent *event)
     QWidget::timerEvent(event);
 }
 
-QColor ChaseWidget::colorForSegment(int seg) const
-{
+QColor ChaseWidget::colorForSegment(int seg) const {
     int index = ((seg + m_segment) % segmentCount());
     int comp = qMax(0, 255 - (index * (255 / segmentCount())));
     return QColor(comp, comp, comp, 255);
 }
 
-int ChaseWidget::segmentCount() const
-{
+int ChaseWidget::segmentCount() const {
     return 360 / m_step;
 }
 
-void ChaseWidget::setPixmapEnabled(bool enable)
-{
+void ChaseWidget::setPixmapEnabled(bool enable) {
     m_pixmapEnabled = enable;
 }

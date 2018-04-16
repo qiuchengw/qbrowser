@@ -57,8 +57,7 @@ FullScreenNotification::FullScreenNotification(QWidget *parent)
     , width(400)
     , height(80)
     , x((parent->geometry().width() - width) / 2)
-    , y(80)
-{
+    , y(80) {
     setVisible(false);
     setWindowFlags(Qt::ToolTip | Qt::WindowDoesNotAcceptFocus);
 
@@ -76,12 +75,10 @@ FullScreenNotification::FullScreenNotification(QWidget *parent)
     connect(m_animation, SIGNAL(finished()), this, SLOT(fadeOutFinished()));
 }
 
-FullScreenNotification::~FullScreenNotification()
-{
+FullScreenNotification::~FullScreenNotification() {
 }
 
-void FullScreenNotification::show()
-{
+void FullScreenNotification::show() {
     setWindowOpacity(1.0);
     QTimer::singleShot(300, [&] {
         QWidget *parent = parentWidget();
@@ -94,14 +91,12 @@ void FullScreenNotification::show()
     QTimer::singleShot(5000, this, SLOT(fadeOut()));
 }
 
-void FullScreenNotification::hide()
-{
+void FullScreenNotification::hide() {
     QWidget::hide();
     m_animation->stop();
 }
 
-void FullScreenNotification::fadeOut()
-{
+void FullScreenNotification::fadeOut() {
     m_animation->setDuration(800);
     m_animation->setStartValue(1.0);
     m_animation->setEndValue(0.0);
@@ -109,8 +104,7 @@ void FullScreenNotification::fadeOut()
     m_animation->start();
 }
 
-void FullScreenNotification::fadeOutFinished()
-{
+void FullScreenNotification::fadeOutFinished() {
     hide();
     setWindowOpacity(1.0);
 }

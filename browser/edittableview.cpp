@@ -52,23 +52,20 @@
 #include "edittableview.h"
 
 EditTableView::EditTableView(QWidget *parent)
-    : QTableView(parent)
-{
+    : QTableView(parent) {
 }
 
-void EditTableView::keyPressEvent(QKeyEvent *event)
-{
+void EditTableView::keyPressEvent(QKeyEvent *event) {
     if ((event->key() == Qt::Key_Delete
-        || event->key() == Qt::Key_Backspace)
-        && model()) {
+            || event->key() == Qt::Key_Backspace)
+            && model()) {
         removeOne();
     } else {
         QAbstractItemView::keyPressEvent(event);
     }
 }
 
-void EditTableView::removeOne()
-{
+void EditTableView::removeOne() {
     if (!model() || !selectionModel())
         return;
     int row = currentIndex().row();
@@ -79,8 +76,7 @@ void EditTableView::removeOne()
     selectionModel()->select(idx, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 }
 
-void EditTableView::removeAll()
-{
+void EditTableView::removeAll() {
     if (model())
         model()->removeRows(0, model()->rowCount(rootIndex()), rootIndex());
 }

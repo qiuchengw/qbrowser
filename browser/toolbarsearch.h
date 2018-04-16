@@ -61,8 +61,7 @@ QT_END_NAMESPACE
 
 class AutoSaver;
 
-class ToolbarSearch : public SearchLineEdit
-{
+class ToolbarSearch : public SearchLineEdit {
     Q_OBJECT
 
 signals:

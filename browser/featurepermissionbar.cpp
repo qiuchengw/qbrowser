@@ -53,8 +53,7 @@
 
 static const int defaultHeight = 30;
 
-static QString textForPermissionType(QWebEnginePage::Feature type)
-{
+static QString textForPermissionType(QWebEnginePage::Feature type) {
     switch (type) {
     case QWebEnginePage::Notifications:
         return QObject::tr("use desktop notifications");
@@ -76,8 +75,7 @@ static QString textForPermissionType(QWebEnginePage::Feature type)
 
 FeaturePermissionBar::FeaturePermissionBar(QWidget *view)
     : QWidget(view)
-    , m_messageLabel(new QLabel(this))
-{
+    , m_messageLabel(new QLabel(this)) {
     setAutoFillBackground(true);
     QHBoxLayout *l = new QHBoxLayout;
     setLayout(l);
@@ -99,8 +97,7 @@ FeaturePermissionBar::FeaturePermissionBar(QWidget *view)
     setGeometry(0, -defaultHeight, view->width(), defaultHeight);
 }
 
-void FeaturePermissionBar::requestPermission(const QUrl &securityOrigin, QWebEnginePage::Feature feature)
-{
+void FeaturePermissionBar::requestPermission(const QUrl &securityOrigin, QWebEnginePage::Feature feature) {
     m_securityOrigin = securityOrigin;
     m_feature = feature;
     m_messageLabel->setText(tr("%1 wants to %2.").arg(securityOrigin.host()).arg(textForPermissionType(feature)));
@@ -116,17 +113,14 @@ void FeaturePermissionBar::requestPermission(const QUrl &securityOrigin, QWebEng
     animation->start(QPropertyAnimation::DeleteWhenStopped);
 }
 
-void FeaturePermissionBar::permissionDenied()
-{
+void FeaturePermissionBar::permissionDenied() {
     emit featurePermissionProvided(m_securityOrigin, m_feature, QWebEnginePage::PermissionDeniedByUser);
 }
 
-void FeaturePermissionBar::permissionGranted()
-{
+void FeaturePermissionBar::permissionGranted() {
     emit featurePermissionProvided(m_securityOrigin, m_feature, QWebEnginePage::PermissionGrantedByUser);
 }
 
-void FeaturePermissionBar::permissionUnknown()
-{
+void FeaturePermissionBar::permissionUnknown() {
     emit featurePermissionProvided(m_securityOrigin, m_feature, QWebEnginePage::PermissionUnknown);
 }

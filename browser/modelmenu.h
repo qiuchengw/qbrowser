@@ -53,8 +53,7 @@
 
 
 // A QMenu that is dynamically populated from a QAbstractItemModel
-class ModelMenu : public QMenu
-{
+class ModelMenu : public QMenu {
     Q_OBJECT
 
 signals:

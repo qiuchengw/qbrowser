@@ -2,8 +2,7 @@
 #ifndef EDITTREEVIEW_H
 #define EDITTREEVIEW_H
 
-class EditTreeView : public QTreeView
-{
+class EditTreeView : public QTreeView {
     Q_OBJECT
 
 public:

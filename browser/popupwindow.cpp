@@ -5,8 +5,7 @@
 
 PopupWindow::PopupWindow(QWebEngineProfile *profile)
     : m_addressBar(new QLineEdit(this))
-    , m_view(new WebView(this))
-{
+    , m_view(new WebView(this)) {
     m_view->setPage(new WebPage(profile, m_view));
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin(0);
@@ -21,18 +20,15 @@ PopupWindow::PopupWindow(QWebEngineProfile *profile)
     connect(page(), &WebPage::windowCloseRequested, this, &QWidget::close);
 }
 
-QWebEnginePage* PopupWindow::page() const
-{
+QWebEnginePage* PopupWindow::page() const {
     return m_view->page();
 }
 
-void PopupWindow::setUrl(const QUrl &url)
-{
+void PopupWindow::setUrl(const QUrl &url) {
     m_addressBar->setText(url.toString());
 }
 
-void PopupWindow::adjustGeometry(const QRect &newGeometry)
-{
+void PopupWindow::adjustGeometry(const QRect &newGeometry) {
     const int x1 = frameGeometry().left() - geometry().left();
     const int y1 = frameGeometry().top() - geometry().top();
     const int x2 = frameGeometry().right() - geometry().right();

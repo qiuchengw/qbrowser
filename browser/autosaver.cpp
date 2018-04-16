@@ -55,19 +55,16 @@
 #define AUTOSAVE_IN  1000 * 3  // seconds
 #define MAXWAIT      1000 * 15 // seconds
 
-AutoSaver::AutoSaver(QObject *parent) : QObject(parent)
-{
+AutoSaver::AutoSaver(QObject *parent) : QObject(parent) {
     Q_ASSERT(parent);
 }
 
-AutoSaver::~AutoSaver()
-{
+AutoSaver::~AutoSaver() {
     if (m_timer.isActive())
         qWarning() << "AutoSaver: still active when destroyed, changes not saved.";
 }
 
-void AutoSaver::changeOccurred()
-{
+void AutoSaver::changeOccurred() {
     if (m_firstChange.isNull())
         m_firstChange.start();
 
@@ -78,8 +75,7 @@ void AutoSaver::changeOccurred()
     }
 }
 
-void AutoSaver::timerEvent(QTimerEvent *event)
-{
+void AutoSaver::timerEvent(QTimerEvent *event) {
     if (event->timerId() == m_timer.timerId()) {
         saveIfNeccessary();
     } else {
@@ -87,8 +83,7 @@ void AutoSaver::timerEvent(QTimerEvent *event)
     }
 }
 
-void AutoSaver::saveIfNeccessary()
-{
+void AutoSaver::saveIfNeccessary() {
     if (!m_timer.isActive())
         return;
     m_timer.stop();

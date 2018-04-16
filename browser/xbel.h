@@ -1,8 +1,7 @@
 #ifndef XBEL_H
 #define XBEL_H
 
-class BookmarkNode
-{
+class BookmarkNode {
 public:
     enum Type {
         Root,
@@ -35,8 +34,7 @@ private:
 
 };
 
-class XbelReader : public QXmlStreamReader
-{
+class XbelReader : public QXmlStreamReader {
 public:
     XbelReader();
     BookmarkNode *read(const QString &fileName);
@@ -51,8 +49,7 @@ private:
     void readBookmarkNode(BookmarkNode *parent);
 };
 
-class XbelWriter : public QXmlStreamWriter
-{
+class XbelWriter : public QXmlStreamWriter {
 public:
     XbelWriter();
     bool write(const QString &fileName, const BookmarkNode *root);

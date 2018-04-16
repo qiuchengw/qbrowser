@@ -3,8 +3,7 @@
 #include <QtWidgets/QWidget>
 #include "ui_test.h"
 
-class test : public QWidget
-{
+class test : public QWidget {
     Q_OBJECT
 
 public:

@@ -2,16 +2,14 @@
 #include "xbel.h"
 
 BookmarkNode::BookmarkNode(BookmarkNode::Type type, BookmarkNode *parent) :
-     expanded(false)
-   , m_parent(parent)
-   , m_type(type)
-{
+    expanded(false)
+    , m_parent(parent)
+    , m_type(type) {
     if (parent)
         parent->add(this);
 }
 
-BookmarkNode::~BookmarkNode()
-{
+BookmarkNode::~BookmarkNode() {
     if (m_parent)
         m_parent->remove(this);
     qDeleteAll(m_children);
@@ -19,14 +17,13 @@ BookmarkNode::~BookmarkNode()
     m_type = BookmarkNode::Root;
 }
 
-bool BookmarkNode::operator==(const BookmarkNode &other)
-{
+bool BookmarkNode::operator==(const BookmarkNode &other) {
     if (url != other.url
-        || title != other.title
-        || desc != other.desc
-        || expanded != other.expanded
-        || m_type != other.m_type
-        || m_children.count() != other.m_children.count())
+            || title != other.title
+            || desc != other.desc
+            || expanded != other.expanded
+            || m_type != other.m_type
+            || m_children.count() != other.m_children.count())
         return false;
 
     for (int i = 0; i < m_children.count(); ++i)
@@ -35,28 +32,23 @@ bool BookmarkNode::operator==(const BookmarkNode &other)
     return true;
 }
 
-BookmarkNode::Type BookmarkNode::type() const
-{
+BookmarkNode::Type BookmarkNode::type() const {
     return m_type;
 }
 
-void BookmarkNode::setType(Type type)
-{
+void BookmarkNode::setType(Type type) {
     m_type = type;
 }
 
-QList<BookmarkNode *> BookmarkNode::children() const
-{
+QList<BookmarkNode *> BookmarkNode::children() const {
     return m_children;
 }
 
-BookmarkNode *BookmarkNode::parent() const
-{
+BookmarkNode *BookmarkNode::parent() const {
     return m_parent;
 }
 
-void BookmarkNode::add(BookmarkNode *child, int offset)
-{
+void BookmarkNode::add(BookmarkNode *child, int offset) {
     Q_ASSERT(child->m_type != Root);
     if (child->m_parent)
         child->m_parent->remove(child);
@@ -66,19 +58,16 @@ void BookmarkNode::add(BookmarkNode *child, int offset)
     m_children.insert(offset, child);
 }
 
-void BookmarkNode::remove(BookmarkNode *child)
-{
+void BookmarkNode::remove(BookmarkNode *child) {
     child->m_parent = 0;
     m_children.removeAll(child);
 }
 
 
-XbelReader::XbelReader()
-{
+XbelReader::XbelReader() {
 }
 
-BookmarkNode *XbelReader::read(const QString &fileName)
-{
+BookmarkNode *XbelReader::read(const QString &fileName) {
     QFile file(fileName);
     if (!file.exists()) {
         return new BookmarkNode(BookmarkNode::Root);
@@ -87,14 +76,13 @@ BookmarkNode *XbelReader::read(const QString &fileName)
     return read(&file);
 }
 
-BookmarkNode *XbelReader::read(QIODevice *device)
-{
+BookmarkNode *XbelReader::read(QIODevice *device) {
     BookmarkNode *root = new BookmarkNode(BookmarkNode::Root);
     setDevice(device);
     if (readNextStartElement()) {
         QString version = attributes().value(QLatin1String("version")).toString();
         if (name() == QLatin1String("xbel")
-            && (version.isEmpty() || version == QLatin1String("1.0"))) {
+                && (version.isEmpty() || version == QLatin1String("1.0"))) {
             readXBEL(root);
         } else {
             raiseError(QObject::tr("The file is not an XBEL version 1.0 file."));
@@ -103,8 +91,7 @@ BookmarkNode *XbelReader::read(QIODevice *device)
     return root;
 }
 
-void XbelReader::readXBEL(BookmarkNode *parent)
-{
+void XbelReader::readXBEL(BookmarkNode *parent) {
     Q_ASSERT(isStartElement() && name() == QLatin1String("xbel"));
 
     while (readNextStartElement()) {
@@ -119,8 +106,7 @@ void XbelReader::readXBEL(BookmarkNode *parent)
     }
 }
 
-void XbelReader::readFolder(BookmarkNode *parent)
-{
+void XbelReader::readFolder(BookmarkNode *parent) {
     Q_ASSERT(isStartElement() && name() == QLatin1String("folder"));
 
     BookmarkNode *folder = new BookmarkNode(BookmarkNode::Folder, parent);
@@ -142,27 +128,23 @@ void XbelReader::readFolder(BookmarkNode *parent)
     }
 }
 
-void XbelReader::readTitle(BookmarkNode *parent)
-{
+void XbelReader::readTitle(BookmarkNode *parent) {
     Q_ASSERT(isStartElement() && name() == QLatin1String("title"));
     parent->title = readElementText();
 }
 
-void XbelReader::readDescription(BookmarkNode *parent)
-{
+void XbelReader::readDescription(BookmarkNode *parent) {
     Q_ASSERT(isStartElement() && name() == QLatin1String("desc"));
     parent->desc = readElementText();
 }
 
-void XbelReader::readSeparator(BookmarkNode *parent)
-{
+void XbelReader::readSeparator(BookmarkNode *parent) {
     new BookmarkNode(BookmarkNode::Separator, parent);
     // empty elements have a start and end element
     readNext();
 }
 
-void XbelReader::readBookmarkNode(BookmarkNode *parent)
-{
+void XbelReader::readBookmarkNode(BookmarkNode *parent) {
     Q_ASSERT(isStartElement() && name() == QLatin1String("bookmark"));
     BookmarkNode *bookmark = new BookmarkNode(BookmarkNode::Bookmark, parent);
     bookmark->url = attributes().value(QLatin1String("href")).toString();
@@ -179,21 +161,18 @@ void XbelReader::readBookmarkNode(BookmarkNode *parent)
 }
 
 
-XbelWriter::XbelWriter()
-{
+XbelWriter::XbelWriter() {
     setAutoFormatting(true);
 }
 
-bool XbelWriter::write(const QString &fileName, const BookmarkNode *root)
-{
+bool XbelWriter::write(const QString &fileName, const BookmarkNode *root) {
     QFile file(fileName);
     if (!root || !file.open(QFile::WriteOnly))
         return false;
     return write(&file, root);
 }
 
-bool XbelWriter::write(QIODevice *device, const BookmarkNode *root)
-{
+bool XbelWriter::write(QIODevice *device, const BookmarkNode *root) {
     setDevice(device);
 
     writeStartDocument();
@@ -211,8 +190,7 @@ bool XbelWriter::write(QIODevice *device, const BookmarkNode *root)
     return true;
 }
 
-void XbelWriter::writeItem(const BookmarkNode *parent)
-{
+void XbelWriter::writeItem(const BookmarkNode *parent) {
     switch (parent->type()) {
     case BookmarkNode::Folder:
         writeStartElement(QLatin1String("folder"));

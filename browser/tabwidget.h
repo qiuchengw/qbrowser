@@ -11,8 +11,7 @@ QT_END_NAMESPACE
 /*
     Tab bar with a few more features such as a context menu and shortcuts
  */
-class TabBar : public QTabBar
-{
+class TabBar : public QTabBar {
     Q_OBJECT
 
 signals:
@@ -63,8 +62,7 @@ class WebView;
     Example usage: used to keep the main window stop action in sync with
     the current tabs webview's stop action.
  */
-class WebActionMapper : public QObject
-{
+class WebActionMapper : public QObject {
     Q_OBJECT
 
 public:
@@ -103,8 +101,7 @@ QT_END_NAMESPACE
     Connects up the current tab's signals to this class's signal and uses WebActionMapper
     to proxy the actions.
  */
-class TabWidget : public QTabWidget
-{
+class TabWidget : public QTabWidget {
     Q_OBJECT
 
 signals:

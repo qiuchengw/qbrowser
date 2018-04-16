@@ -51,8 +51,7 @@
 #ifndef EDITTABLEVIEW_H
 #define EDITTABLEVIEW_H
 
-class EditTableView : public QTableView
-{
+class EditTableView : public QTableView {
     Q_OBJECT
 
 public:

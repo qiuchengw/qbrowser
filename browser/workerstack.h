@@ -7,8 +7,7 @@ class FArticleList;
 
 class TabWidget;
 class WebView;
-class WorkerStack : public QTabWidget
-{
+class WorkerStack : public QTabWidget {
     Q_OBJECT
 
 public:
@@ -18,10 +17,10 @@ public:
     void addPanel(BrowserFunctionPanel* panel);
 
 public slots:
-void onNewTab(WebView*);
-void onCloseTab(WebView*);
-void onTabsChanged(int);
-void onOpenUrl(QString file, bool newtab);
+    void onNewTab(WebView*);
+    void onCloseTab(WebView*);
+    void onTabsChanged(int);
+    void onOpenUrl(QString file, bool newtab);
 
 private:
     TabWidget* tab_ = nullptr;

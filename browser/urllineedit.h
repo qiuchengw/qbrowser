@@ -57,14 +57,15 @@ class QLineEdit;
 QT_END_NAMESPACE
 
 class ClearButton;
-class ExLineEdit : public QWidget
-{
+class ExLineEdit : public QWidget {
     Q_OBJECT
 
 public:
     ExLineEdit(QWidget *parent = 0);
 
-    inline QLineEdit *lineEdit() const { return m_lineEdit; }
+    inline QLineEdit *lineEdit() const {
+        return m_lineEdit;
+    }
 
     void setLeftWidget(QWidget *widget);
     QWidget *leftWidget() const;
@@ -92,8 +93,7 @@ protected:
 
 class UrlIconLabel;
 class WebView;
-class UrlLineEdit : public ExLineEdit
-{
+class UrlLineEdit : public ExLineEdit {
     Q_OBJECT
 
 public:

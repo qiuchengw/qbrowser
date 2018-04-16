@@ -52,8 +52,7 @@
 #include "searchlineedit.h"
 
 ClearButton::ClearButton(QWidget *parent)
-  : QAbstractButton(parent)
-{
+    : QAbstractButton(parent) {
 #ifndef QT_NO_CURSOR
     setCursor(Qt::ArrowCursor);
 #endif // QT_NO_CURSOR
@@ -62,8 +61,7 @@ ClearButton::ClearButton(QWidget *parent)
     setFocusPolicy(Qt::NoFocus);
 }
 
-void ClearButton::paintEvent(QPaintEvent *event)
-{
+void ClearButton::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event);
     QPainter painter(this);
     int height = this->height();
@@ -84,8 +82,7 @@ void ClearButton::paintEvent(QPaintEvent *event)
     painter.drawLine(border, height - border, width() - border, border);
 }
 
-void ClearButton::textChanged(const QString &text)
-{
+void ClearButton::textChanged(const QString &text) {
     setVisible(!text.isEmpty());
 }
 
@@ -104,9 +101,8 @@ protected:
 };
 
 SearchButton::SearchButton(QWidget *parent)
-  : QAbstractButton(parent),
-    m_menu(0)
-{
+    : QAbstractButton(parent),
+      m_menu(0) {
     setObjectName(QLatin1String("SearchButton"));
 #ifndef QT_NO_CURSOR
     setCursor(Qt::ArrowCursor);
@@ -114,8 +110,7 @@ SearchButton::SearchButton(QWidget *parent)
     setFocusPolicy(Qt::NoFocus);
 }
 
-void SearchButton::mousePressEvent(QMouseEvent *event)
-{
+void SearchButton::mousePressEvent(QMouseEvent *event) {
     if (m_menu && event->button() == Qt::LeftButton) {
         QWidget *p = parentWidget();
         if (p) {
@@ -127,8 +122,7 @@ void SearchButton::mousePressEvent(QMouseEvent *event)
     QAbstractButton::mousePressEvent(event);
 }
 
-void SearchButton::paintEvent(QPaintEvent *event)
-{
+void SearchButton::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event);
     QPainterPath myPath;
 
@@ -170,8 +164,7 @@ void SearchButton::paintEvent(QPaintEvent *event)
     - When there is text a clear button is displayed on the right hand side
  */
 SearchLineEdit::SearchLineEdit(QWidget *parent) : ExLineEdit(parent),
-    m_searchButton(new SearchButton(this))
-{
+    m_searchButton(new SearchButton(this)) {
     connect(lineEdit(), SIGNAL(textChanged(QString)),
             this, SIGNAL(textChanged(QString)));
     setLeftWidget(m_searchButton);
@@ -181,8 +174,7 @@ SearchLineEdit::SearchLineEdit(QWidget *parent) : ExLineEdit(parent),
     setSizePolicy(QSizePolicy::Preferred, policy.verticalPolicy());
 }
 
-void SearchLineEdit::paintEvent(QPaintEvent *event)
-{
+void SearchLineEdit::paintEvent(QPaintEvent *event) {
     if (lineEdit()->text().isEmpty() && !hasFocus() && !m_inactiveText.isEmpty()) {
         ExLineEdit::paintEvent(event);
         QStyleOptionFrame panel;
@@ -200,14 +192,12 @@ void SearchLineEdit::paintEvent(QPaintEvent *event)
     }
 }
 
-void SearchLineEdit::resizeEvent(QResizeEvent *event)
-{
+void SearchLineEdit::resizeEvent(QResizeEvent *event) {
     updateGeometries();
     ExLineEdit::resizeEvent(event);
 }
 
-void SearchLineEdit::updateGeometries()
-{
+void SearchLineEdit::updateGeometries() {
     int menuHeight = height();
     int menuWidth = menuHeight + 1;
     if (!m_searchButton->m_menu)
@@ -215,26 +205,22 @@ void SearchLineEdit::updateGeometries()
     m_searchButton->resize(QSize(menuWidth, menuHeight));
 }
 
-QString SearchLineEdit::inactiveText() const
-{
+QString SearchLineEdit::inactiveText() const {
     return m_inactiveText;
 }
 
-void SearchLineEdit::setInactiveText(const QString &text)
-{
+void SearchLineEdit::setInactiveText(const QString &text) {
     m_inactiveText = text;
 }
 
-void SearchLineEdit::setMenu(QMenu *menu)
-{
+void SearchLineEdit::setMenu(QMenu *menu) {
     if (m_searchButton->m_menu)
         m_searchButton->m_menu->deleteLater();
     m_searchButton->m_menu = menu;
     updateGeometries();
 }
 
-QMenu *SearchLineEdit::menu() const
-{
+QMenu *SearchLineEdit::menu() const {
     if (!m_searchButton->m_menu) {
         m_searchButton->m_menu = new QMenu(m_searchButton);
         if (isVisible())

@@ -54,31 +54,27 @@
 #include "history.h"
 
 EditTreeView::EditTreeView(QWidget *parent)
-    : QTreeView(parent)
-{
+    : QTreeView(parent) {
 }
 
-void EditTreeView::keyPressEvent(QKeyEvent *event)
-{
+void EditTreeView::keyPressEvent(QKeyEvent *event) {
     if ((event->key() == Qt::Key_Delete
-        || event->key() == Qt::Key_Backspace)
-        && model()) {
+            || event->key() == Qt::Key_Backspace)
+            && model()) {
         removeOne();
     } else {
         QAbstractItemView::keyPressEvent(event);
     }
 }
 
-void EditTreeView::removeOne()
-{
+void EditTreeView::removeOne() {
     if (!model())
         return;
     QModelIndex ci = currentIndex();
     BrowserService::historyMan()->removeHistoryEntry(model()->data(ci,HistoryModel::UrlStringRole).toString());
 }
 
-void EditTreeView::removeAll()
-{
+void EditTreeView::removeAll() {
     if (!model())
         return;
     BrowserService::historyMan()->clear();

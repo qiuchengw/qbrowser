@@ -8,8 +8,7 @@
 #include "tabwidget.h"
 #include "webview.h"
 
-static void setUserStyleSheet(QWebEngineProfile *profile, const QString &styleSheet, BrowserWnd *wnd = 0)
-{
+static void setUserStyleSheet(QWebEngineProfile *profile, const QString &styleSheet, BrowserWnd *wnd = 0) {
     Q_ASSERT(profile);
     QString scriptName(QStringLiteral("userStyleSheet"));
     QWebEngineScript script;
@@ -26,15 +25,15 @@ static void setUserStyleSheet(QWebEngineProfile *profile, const QString &styleSh
         script.setWorldId(QWebEngineScript::ApplicationWorld);
     }
     QString source = QString::fromLatin1("(function() {"\
-        "var css = document.getElementById(\"_qt_testBrowser_userStyleSheet\");"\
-        "if (css == undefined) {"\
-        "    css = document.createElement(\"style\");"\
-        "    css.type = \"text/css\";"\
-        "    css.id = \"_qt_testBrowser_userStyleSheet\";"\
-        "    document.head.appendChild(css);"\
-        "}"\
-        "css.innerText = \"%1\";"\
-        "})()").arg(styleSheet);
+                                         "var css = document.getElementById(\"_qt_testBrowser_userStyleSheet\");"\
+                                         "if (css == undefined) {"\
+                                         "    css = document.createElement(\"style\");"\
+                                         "    css.type = \"text/css\";"\
+                                         "    css.id = \"_qt_testBrowser_userStyleSheet\";"\
+                                         "    document.head.appendChild(css);"\
+                                         "}"\
+                                         "css.innerText = \"%1\";"\
+                                         "})()").arg(styleSheet);
     script.setSourceCode(source);
     profile->scripts()->insert(script);
     // run the script on the already loaded views
@@ -46,8 +45,7 @@ static void setUserStyleSheet(QWebEngineProfile *profile, const QString &styleSh
 BrowserService::BrowserService()
     : SingletonWithBase<BrowserService, QObject>(nullptr)
     , m_privateProfile(0)
-    , m_privateBrowsing(false)
-{
+    , m_privateBrowsing(false) {
     QString localSysName = QLocale::system().name();
     installTranslator(QLatin1String("qt_") + localSysName);
 
@@ -57,8 +55,7 @@ BrowserService::BrowserService()
     settings.endGroup();
 }
 
-BrowserService::~BrowserService()
-{
+BrowserService::~BrowserService() {
     delete s_downloadManager;
     for (int i = 0; i < m_mainWindows.size(); ++i) {
         BrowserWnd *window = m_mainWindows.at(i);
@@ -68,8 +65,7 @@ BrowserService::~BrowserService()
     delete s_bookmarksManager;
 }
 
-void BrowserService::lastWindowClosed()
-{
+void BrowserService::lastWindowClosed() {
 #if defined(Q_OS_OSX)
     clean();
     BrowserWnd *mw = new BrowserWnd;
@@ -81,8 +77,7 @@ void BrowserService::lastWindowClosed()
 /*!
     Any actions that can be delayed until the window is visible
  */
-void BrowserService::postLaunch()
-{
+void BrowserService::postLaunch() {
     QString directory = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
     if (directory.isEmpty())
         directory = QDir::homePath() + QLatin1String("/.") + QCoreApplication::applicationName();
@@ -96,8 +91,7 @@ void BrowserService::postLaunch()
     BrowserService::historyMan();
 }
 
-void BrowserService::loadSettings()
-{
+void BrowserService::loadSettings() {
     QSettings settings;
     settings.beginGroup(QLatin1String("websettings"));
 
@@ -171,8 +165,7 @@ void BrowserService::loadSettings()
     settings.endGroup();
 }
 
-QList<BrowserWnd*> BrowserService::browsers()
-{
+QList<BrowserWnd*> BrowserService::browsers() {
     clean();
     QList<BrowserWnd*> list;
     for (int i = 0; i < m_mainWindows.count(); ++i)
@@ -180,16 +173,14 @@ QList<BrowserWnd*> BrowserService::browsers()
     return list;
 }
 
-void BrowserService::clean()
-{
+void BrowserService::clean() {
     // cleanup any deleted main windows first
     for (int i = m_mainWindows.count() - 1; i >= 0; --i)
         if (m_mainWindows.at(i).isNull())
             m_mainWindows.removeAt(i);
 }
 
-void BrowserService::saveSession()
-{
+void BrowserService::saveSession() {
     if (m_privateBrowsing)
         return;
 
@@ -210,13 +201,11 @@ void BrowserService::saveSession()
     settings.endGroup();
 }
 
-bool BrowserService::canRestoreSession() const
-{
+bool BrowserService::canRestoreSession() const {
     return !m_lastSession.isEmpty();
 }
 
-void BrowserService::restoreLastSession()
-{
+void BrowserService::restoreLastSession() {
     QList<QByteArray> windows;
     QBuffer buffer(&m_lastSession);
     QDataStream stream(&buffer);
@@ -231,27 +220,24 @@ void BrowserService::restoreLastSession()
     for (int i = 0; i < windows.count(); ++i) {
         BrowserWnd *newWindow = 0;
         if (m_mainWindows.count() == 1
-            && browser()->tabWidget()->count() == 1
-            && browser()->currentTab()->url() == QUrl()) {
+                && browser()->tabWidget()->count() == 1
+                && browser()->currentTab()->url() == QUrl()) {
             newWindow = browser();
-        }
-        else {
+        } else {
             newWindow = newBroswer();
         }
         newWindow->restoreState(windows.at(i));
     }
 }
 
-void BrowserService::installTranslator(const QString &name)
-{
+void BrowserService::installTranslator(const QString &name) {
     QTranslator *translator = new QTranslator(this);
     translator->load(name, QLibraryInfo::location(QLibraryInfo::TranslationsPath));
     QApplication::installTranslator(translator);
 }
 
 #if defined(Q_OS_OSX)
-bool BrowserService::event(QEvent* event)
-{
+bool BrowserService::event(QEvent* event) {
     switch (event->type()) {
     case QEvent::ApplicationActivate: {
         clean();
@@ -275,21 +261,18 @@ bool BrowserService::event(QEvent* event)
 }
 #endif
 
-void BrowserService::openUrl(const QUrl &url)
-{
+void BrowserService::openUrl(const QUrl &url) {
     browser()->loadPage(url.toString());
 }
 
-BrowserWnd *BrowserService::newBroswer()
-{
+BrowserWnd *BrowserService::newBroswer() {
     BrowserWnd *browser = new BrowserWnd();
     m_mainWindows.prepend(browser);
     browser->show();
     return browser;
 }
 
-BrowserWnd *BrowserService::browser()
-{
+BrowserWnd *BrowserService::browser() {
     clean();
     if (m_mainWindows.isEmpty())
         newBroswer();
@@ -297,8 +280,7 @@ BrowserWnd *BrowserService::browser()
     return m_mainWindows[0];
 }
 
-CookieJar *BrowserService::cookieJar()
-{
+CookieJar *BrowserService::cookieJar() {
 #if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)
     return (CookieJar*)networkAccessMan()->cookieJar();
 #else
@@ -306,8 +288,7 @@ CookieJar *BrowserService::cookieJar()
 #endif
 }
 
-DownloadManager *BrowserService::downloadMan()
-{
+DownloadManager *BrowserService::downloadMan() {
     BrowserService* inst = BrowserService::instance();
     if (!inst->s_downloadManager) {
         inst->s_downloadManager = new DownloadManager();
@@ -315,8 +296,7 @@ DownloadManager *BrowserService::downloadMan()
     return inst->s_downloadManager;
 }
 
-QNetworkAccessManager *BrowserService::networkAccessMan()
-{
+QNetworkAccessManager *BrowserService::networkAccessMan() {
     BrowserService* inst = BrowserService::instance();
     if (!inst->s_networkAccessManager) {
         inst->s_networkAccessManager = new QNetworkAccessManager();
@@ -324,16 +304,14 @@ QNetworkAccessManager *BrowserService::networkAccessMan()
     return inst->s_networkAccessManager;
 }
 
-HistoryManager *BrowserService::historyMan()
-{
+HistoryManager *BrowserService::historyMan() {
     BrowserService* inst = BrowserService::instance();
     if (!inst->s_historyManager)
         inst->s_historyManager = new HistoryManager();
     return inst->s_historyManager;
 }
 
-BookmarksManager *BrowserService::bookmarksMan()
-{
+BookmarksManager *BrowserService::bookmarksMan() {
     BrowserService* inst = BrowserService::instance();
     if (!inst->s_bookmarksManager) {
         inst->s_bookmarksManager = new BookmarksManager;
@@ -341,8 +319,7 @@ BookmarksManager *BrowserService::bookmarksMan()
     return inst->s_bookmarksManager;
 }
 
-QIcon BrowserService::icon(const QUrl &url) const
-{
+QIcon BrowserService::icon(const QUrl &url) const {
 #if defined(QTWEBENGINE_ICONDATABASE)
     QIcon icon = QWebEngineSettings::iconForUrl(url);
     if (!icon.isNull())
@@ -353,15 +330,13 @@ QIcon BrowserService::icon(const QUrl &url) const
     return defaultIcon();
 }
 
-QIcon BrowserService::defaultIcon() const
-{
+QIcon BrowserService::defaultIcon() const {
     if (m_defaultIcon.isNull())
         m_defaultIcon = QIcon(QLatin1String(":defaulticon.png"));
     return m_defaultIcon;
 }
 
-void BrowserService::setPrivateBrowsing(bool privateBrowsing)
-{
+void BrowserService::setPrivateBrowsing(bool privateBrowsing) {
     if (m_privateBrowsing == privateBrowsing)
         return;
     m_privateBrowsing = privateBrowsing;
@@ -371,8 +346,7 @@ void BrowserService::setPrivateBrowsing(bool privateBrowsing)
         Q_FOREACH(BrowserWnd* window, browsers()) {
             window->tabWidget()->setProfile(m_privateProfile);
         }
-    }
-    else {
+    } else {
         Q_FOREACH(BrowserWnd* window, browsers()) {
             window->tabWidget()->setProfile(QWebEngineProfile::defaultProfile());
             window->m_lastSearch = QString();

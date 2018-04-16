@@ -57,8 +57,7 @@ class QGridLayout;
 class QPropertyAnimation;
 QT_END_NAMESPACE
 
-class FullScreenNotification : public QWidget
-{
+class FullScreenNotification : public QWidget {
     Q_OBJECT
 public:
     FullScreenNotification(QWidget *parent = 0);

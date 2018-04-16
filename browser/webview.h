@@ -16,15 +16,21 @@ class BROWSER_EXPORT WebView : public QWebEngineView {
 
 public:
     WebView(QWidget *parent = 0);
-    WebPage *webPage() const { return m_page; }
+    WebPage *webPage() const {
+        return m_page;
+    }
     void setPage(WebPage *page);
 
     void loadUrl(const QUrl &url);
     QUrl url() const;
 
     QString lastStatusBarText() const;
-    inline int progress() const { return m_progress; }
-	inline bool sucessFinished() const { return m_progress == 100; }
+    inline int progress() const {
+        return m_progress;
+    }
+    inline bool sucessFinished() const {
+        return m_progress == 100;
+    }
 
     void toHtml(std::function<void(const QString&)>);
 

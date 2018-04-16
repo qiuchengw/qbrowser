@@ -64,8 +64,7 @@ class SearchButton;
     Hidden by default
     "A circle with an X in it"
  */
-class ClearButton : public QAbstractButton
-{
+class ClearButton : public QAbstractButton {
     Q_OBJECT
 
 public:
@@ -77,8 +76,7 @@ public slots:
 };
 
 
-class SearchLineEdit : public ExLineEdit
-{
+class SearchLineEdit : public ExLineEdit {
     Q_OBJECT
     Q_PROPERTY(QString inactiveText READ inactiveText WRITE setInactiveText)
 
