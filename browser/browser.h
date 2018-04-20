@@ -20,7 +20,7 @@ typedef void* BROWSER_HANDLE;
 typedef std::function<void(BROWSER_HANDLE)> BrowserDestoryCallback;
 typedef std::function<void(BROWSER_HANDLE)> CreateBrowserDelegater;
 
-class BrowserServiceContext : public QObject {
+class BROWSER_EXPORT BrowserServiceContext : public QObject {
     Q_OBJECT
 
 public:
@@ -35,7 +35,7 @@ signals:
 };
 
 class BrowserWnd;
-class BrowserFunctionPanel {
+class BROWSER_EXPORT BrowserFunctionPanel {
     friend class BrowserWnd;
 public:
     BrowserFunctionPanel(const QString& name)
@@ -68,11 +68,10 @@ public:
 
     // 当前活动的tab页面
     WebView* webView()const;
+
+	// 获取所有的
     std::vector<WebView*> allWebViews()const;
 
-//     virtual void onUrlChanged(WebView*, const QString& url) {
-//
-//     }
 private:
     void setBrowserWnd(BrowserWnd* wnd) {
         wnd_ = wnd;
