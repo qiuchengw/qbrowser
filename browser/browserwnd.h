@@ -47,8 +47,8 @@ public:
     TabWidget *tabWidget() const;
     WebView *currentTab() const;
     WebView *viewOfTab(int idx) const;
-    std::vector<WebView *>allViews(int idx) const;
-    WebView* newTab(bool set_current = true);
+	std::vector<WebView *> allViews() const;
+	WebView* newTab(bool set_current = true);
 
     QByteArray saveState(bool withTabs = true) const;
     bool restoreState(const QByteArray &state);
