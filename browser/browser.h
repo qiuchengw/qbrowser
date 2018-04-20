@@ -62,6 +62,10 @@ public:
     virtual void onTabActived(WebView*) {
     }
 
+    // attach到wnd上
+    virtual void onAttachedPanel() {
+    }
+
     // 当前活动的tab页面
     WebView* webView()const;
     std::vector<WebView*> allWebViews()const;
