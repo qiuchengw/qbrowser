@@ -64,6 +64,7 @@ public:
 
     // 当前活动的tab页面
     WebView* webView()const;
+    std::vector<WebView*> allWebViews()const;
 
 //     virtual void onUrlChanged(WebView*, const QString& url) {
 //

@@ -860,6 +860,18 @@ WebView *BrowserWnd::currentTab() const {
     return m_tabWidget->currentWebView();
 }
 
+WebView * BrowserWnd::viewOfTab(int idx) const {
+    return m_tabWidget->webView(idx);
+}
+
+std::vector<WebView *> BrowserWnd::allViews(int idx) const {
+    std::vector<WebView *> ret;
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        ret.push_back(viewOfTab(idx));
+    }
+    return ret;
+}
+
 WebView* BrowserWnd::newTab(bool set_current) {
     return m_tabWidget->newTab(set_current);
 }

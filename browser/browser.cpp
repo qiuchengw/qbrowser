@@ -37,3 +37,8 @@ WebView* BrowserFunctionPanel::webView() const {
     }
     return nullptr;
 }
+
+std::vector<WebView*> BrowserFunctionPanel::allWebViews() const {
+    return wnd_->allViews();
+
+}
